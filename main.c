@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 typedef uint64_t u64;
 
@@ -33,6 +36,11 @@ typedef struct Board{
 	0 1 2 3 4 5 6 7
 */
 
+void error(char* message){
+	fprintf(stderr,"ERROR %s\n" ,message);
+	exit(EXIT_FAILURE);
+}
+
 bool BBGet(u64 bb, int x, int y){
 	return bb&((u64)1<<((y*8)+x));
 }
@@ -53,7 +61,7 @@ void printBB(u64 bb){
 	}
 }
 
-void printBoard(Board *board, u64 highlighted){
+void printBoard(Board *board){
 	char* pieceChars = "PNBRQKpnbrqk";
 	printf("  a b c d e f g h\n");//header
 	for(int y = 7; y>=0; y--){
@@ -63,9 +71,6 @@ void printBoard(Board *board, u64 highlighted){
 				printf("\x1b[42;30m");//background color green, fg color black
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
-
-			if(BBGet(highlighted, x, y))
-				printf("\x1b[44;30m");//background color blue, fg color black
 
 			int piece = board->squares[x][y];
 			if(piece == P_EMPTY){
@@ -86,14 +91,58 @@ void printBoard(Board *board, u64 highlighted){
 	}
 }
 
-int main(int argc, char* argv[]){
-	
-	Board board;
-	for(int y = 0; y<8; y++){
-		for(int x = 0; x<8; x++){
-			board.squares[x][y] = (x%7)-1;
+void loadFEN(Board *board, char* fen){
+	int index = 0;
+	int x = 0;
+	int y = 7;
+	while(index<strlen(fen)){
+		if(isdigit(fen[index])){
+			for(int i = 0; i<fen[index]-'0'; i++){
+				board->squares[x][y] = P_EMPTY;
+				x++;
+			}
+			index++;
 		}
-	}
-	printBoard(&board, 0);
+		if(fen[index] == '/'){
+			y--;
+			x = 0;
+			index++;
+		};
+		if(isalpha(fen[index])){
+			switch(tolower(fen[index])){
+				case 'p':
+					board->squares[x][y] = P_PAWN;
+					break;
+				case 'n':
+					board->squares[x][y] = P_KNIGHT;
+					break;
+				case 'b':
+					board->squares[x][y] = P_BISHOP;
+					break;
+				case 'r':
+					board->squares[x][y] = P_ROOK;
+					break;
+				case 'k':
+					board->squares[x][y] = P_KING;
+					break;
+				case 'q':
+					board->squares[x][y] = P_QUEEN;
+					break;
+			}
+			if(islower(fen[index])){
+				board->squares[x][y] |= MP_BLACK;
+				printf("%c", fen[index]);
+			}
+			x++;
+			index++;
+		}
+	}	
+}
+
+int main(int argc, char* argv[]){
+	char* fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+	Board board;
+	loadFEN(&board, fen);
+	printBoard(&board);
 	return 0;
 }
