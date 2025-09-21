@@ -4,8 +4,11 @@
 
 typedef uint64_t u64;
 
+//bits 0-3 are the piece type, if bit 4 is set it is black
+//---cpppp
+
 typedef enum Piece{
-	P_EMPTY = 0,
+	P_EMPTY = -1, //for squarewise board only
 	P_PAWN,
 	P_KNIGHT,
 	P_BISHOP,
@@ -14,13 +17,15 @@ typedef enum Piece{
 	P_KING
 }Piece;
 
+//peice masks
+#define MP_BLACK 0b00010000
+#define MP_PIECE 0b00001111 //ignore color
+
 typedef struct Board{
-	Piece pieces[8][8];//x,y
-	bool isWhite[8][8];
+	int squares[8][8];//x,y
+	u64 whiteBBs[6];
+	u64 blackBBs[6];
 }Board;
-
-
-#define getBit(bb, index) ((bb)&(1<<(index)))
 
 //bit 0 in a bitboard represents a1, bit 1 b1, bit 2 c1, ect
 /*
@@ -48,9 +53,8 @@ void printBB(u64 bb){
 	}
 }
 
-void printBoard(Board *board){
-	
-	char* pieceChars = " PNBRQKpnbrqk";
+void printBoard(Board *board, u64 highlighted){
+	char* pieceChars = "PNBRQKpnbrqk";
 	printf("  a b c d e f g h\n");//header
 	for(int y = 7; y>=0; y--){
 		printf("%c", '1'+y);
@@ -60,10 +64,21 @@ void printBoard(Board *board){
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
 
-			printf(" ");
-			Piece piece = board->pieces[x][y];
-			if(!board->isWhite[x][y]&&piece!=P_EMPTY) piece+=6;
-			printf("%c", pieceChars[piece]);
+			if(BBGet(highlighted, x, y))
+				printf("\x1b[44;30m");//background color blue, fg color black
+
+			int piece = board->squares[x][y];
+			if(piece == P_EMPTY){
+				printf("  \x1b[0m");
+				continue;
+			}
+			int index = piece&MP_PIECE;
+			if(index>=0 && index<6){
+				if(piece&MP_BLACK) index+=6;
+				printf("%c ", pieceChars[index]);
+			}
+			else
+				printf("!?");
 
 			printf("\x1b[0m");//color reset
 		}
@@ -76,15 +91,9 @@ int main(int argc, char* argv[]){
 	Board board;
 	for(int y = 0; y<8; y++){
 		for(int x = 0; x<8; x++){
-			board.pieces[x][y] = x%7;
-			board.isWhite[x][y] = y%2==0; 
+			board.squares[x][y] = (x%7)-1;
 		}
 	}
-	printBoard(&board);
-	printBB(0xAAAAAAAAAAAAAAAA);
-	printBB(0xFF00FF00FF00FF00);
-	printBB(1);
-	printBB(((u64)1)<<5);
-	printBB(((u64)1)<<63);
+	printBoard(&board, 0);
 	return 0;
 }
