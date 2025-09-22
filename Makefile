@@ -1,7 +1,7 @@
 CC:=clang
 CARGS:=
 BINNAME=main
-SRC:=main.c
+SRC:= $(wildcard ./*.c)
 
 OBJ:=$(SRC:.c=.o)
 # $^ = dependancies
