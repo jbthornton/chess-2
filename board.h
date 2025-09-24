@@ -17,17 +17,19 @@ typedef enum Piece{
 
 
 typedef struct Board{
-	int squares[8][8];//x,y
+	int squares[64];
 	u64 bitboards[12];
 }Board;
 
 //bit 0 in a bitboard represents a1, bit 1 b1, bit 2 c1, ect
+//board indices are in the same order
 /*
 	8 9 ...
 	0 1 2 3 4 5 6 7
 */
 
-#define BBGet(bb, x, y)  ((bb)&((u64)1<<(((y)*8)+(x))))
-#define BBSet(bb, x, y)  ((bb)|=((u64)1<<(((y)*8)+(x))))
+#define boardIndex(x,y) (((y)*8)+(x))
+#define BBGet(bb, x, y) ((bb)&((u64)1<<(((y)*8)+(x))))
+#define BBSet(bb, x, y) ((bb)|=((u64)1<<(((y)*8)+(x))))
 
 void loadFEN(Board *board, char* fen);

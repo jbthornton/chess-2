@@ -31,7 +31,7 @@ void printBoard(Board *board, u64 highlighted){
 			if(BBGet(highlighted, x, y))
 				printf("\x1b[43;30m");
 
-			int piece = board->squares[x][y];
+			int piece = board->squares[boardIndex(x,y)];
 			if(piece == P_EMPTY){
 				printf("  \x1b[0m");
 				continue;
