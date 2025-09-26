@@ -20,7 +20,7 @@ void printBB(u64 bb){
 
 void printBoard(Board *board, u64 highlighted){
 	char* pieceChars = "PNBRQKpnbrqk";
-	printf("  a b c d e f g h\n");//header
+	printf(" a b c d e f g h\n");
 	for(int y = 7; y>=0; y--){
 		printf("%c", '1'+y);
 		for(int x = 0; x<8; x++){
@@ -44,8 +44,10 @@ void printBoard(Board *board, u64 highlighted){
 
 			printf("\x1b[0m");//color reset
 		}
+		printf("%c", '1'+y);
 		printf("\n");
 	}
+	printf(" a b c d e f g h\n");
 }
 
 void printBoardDebug(Board *board){

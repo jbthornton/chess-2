@@ -23,8 +23,10 @@ void cli(){
 	char input[100];
 	loadFEN(&board, fen);
 	bool quit = false;
+	u64 highlighted = (u64)0;
 	while(!quit){
-		printBoard(&board, 0);
+		printBoard(&board, highlighted);
+		highlighted = (u64)0;
 		printf(" :");
 		fgets(input, sizeof(input), stdin);
 
@@ -43,13 +45,26 @@ void cli(){
 			quit = true;
 			continue;
 		}
+
+		if(strcmp(&input[start], "help") == 0){
+			printf( " ---help---\n"
+					" help - show help menu\n"
+					" exit - exit program\n"
+					" <a-h><1-8><a-h><1-8> - make a move (eg d2d4)\n"
+					);
+			continue;
+		}
+
 		if(isMove(&input[start])){
 			Move move;
 			move.from = boardIndex(input[start]-'a',input[start+1]-'1');
 			move.to = boardIndex(input[start+2]-'a',input[start+3]-'1');
 			makeMove(&board, move);
+			BBSet(highlighted, move.to);
+			BBSet(highlighted, move.from);
 			continue;
-		}		
+		}
+		printf("command unrecognised\n");
 	}
 }
 
