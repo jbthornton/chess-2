@@ -6,7 +6,7 @@ void makeMove(Board* board, Move move){
 	
 	board->squares[move.to] = piece;
 	board->squares[move.from] = P_EMPTY;
-	
+
 	BBReset(board->bitboards[piece], move.from);
 	
 	if(captured != P_EMPTY)
