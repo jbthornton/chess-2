@@ -1,3 +1,4 @@
+#pragma once
 #include "board.h"
 
 void printBB(u64 bb);
