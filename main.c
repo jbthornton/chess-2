@@ -62,6 +62,7 @@ void cli(){
 			makeMove(&board, move);
 			BBSet(highlighted, move.to);
 			BBSet(highlighted, move.from);
+			printMove(move);
 			continue;
 		}
 		printf("command unrecognised\n");

@@ -61,3 +61,7 @@ void printBoardDebug(Board *board){
 	for(int i = 6; i<12; i++)
 		printBoard(board, board->bitboards[i]);
 }
+
+void printMove(Move m){
+	printf("%c%c%c%c\n", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8));
+}
