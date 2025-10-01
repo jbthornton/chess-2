@@ -3,6 +3,7 @@
 #include "error.h"
 #include "print.h"
 static u64 knightDestinations[64];
+static u64 kingDestinations[64];
 
 static const int index64[64] = {
     0,  1, 48,  2, 57, 49, 28,  3,
@@ -57,6 +58,18 @@ void generateMoveTables(){
 		-2, 1,
 		-2,-1,
 	};
+	const int kingOffsets[16] = {
+		 1,-1,
+		 1, 0,
+	 	 1, 1,
+
+		 0,-1,
+	 	 0, 1,
+
+		-1,-1,
+		-1, 0,
+	 	-1, 1,	
+	};
 	//knight move tables
 	for(int x = 0; x<8; x++){
 		for(int y = 0; y<8; y++){
@@ -66,6 +79,12 @@ void generateMoveTables(){
 				int dx = x +knightOffsets[j];
 				int dy = y +knightOffsets[j+1];
 				if(dx>=0 && dx<8 && dy>=0 && dy<8) BBSet(knightDestinations[i], boardIndex(dx, dy));
+			}
+			kingDestinations[i] = (u64)0;
+			for(int j = 0; j<16; j+=2){
+				int dx = x +kingOffsets[j];
+				int dy = y +kingOffsets[j+1];
+				if(dx>=0 && dx<8 && dy>=0 && dy<8) BBSet(kingDestinations[i], boardIndex(dx, dy));
 			}
 		}
 	}
@@ -96,12 +115,12 @@ void moveArrayAppend(MoveArray* ma, Move move){
 
 static void genPawnMoves(Board* board, MoveArray* ma);
 static void genKnightMoves(Board* board, MoveArray* ma);
+static void genKingMoves(Board* board, MoveArray* ma);
 
-MoveArray generateMoves(Board* board){
-	MoveArray ma = moveArrayCreate();
-	genPawnMoves(board, &ma);
-	genKnightMoves(board, &ma);
-	return ma;
+void generateMoves(Board* board, MoveArray* ma){
+	genPawnMoves(board, ma);
+	genKnightMoves(board, ma);
+	genKingMoves(board, ma);
 }
 
 static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
@@ -110,23 +129,6 @@ static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
 		destinations &= destinations-1;//reset ls1b
 		Move m = (Move){.to = square, .from = from};
 		moveArrayAppend(ma, m);
-	}
-}
-
-static void genKnightMoves(Board* board, MoveArray* ma){
-	int color = (board->turn == 0)? 0 : 6;
-	u64 friendlyKnights = board->bitboards[P_KNIGHT+color];
-	
-	u64 friendly = 0;
-	for(int i = color; i<color+6; i++){
-		friendly |= board->bitboards[i];
-	}
-
-	while(friendlyKnights){
-		int i = bitScanForward(friendlyKnights);
-		friendlyKnights &= friendlyKnights-1;
-		u64 destinations = knightDestinations[i] & ~friendly;
-		addMovesToDest(destinations, i, ma);
 	}
 }
 
@@ -173,4 +175,34 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 	//right captures 
 	destinations = BBSignedShift(board->bitboards[P_PAWN+color]&(~rightFile), shift+1)&(enemys);
 	addPawnMoves(destinations, shift+1, ma);
+}
+
+static void genKnightMoves(Board* board, MoveArray* ma){
+	int color = (board->turn == 0)? 0 : 6;
+	u64 friendlyKnights = board->bitboards[P_KNIGHT+color];
+	
+	u64 friendly = 0;
+	for(int i = color; i<color+6; i++){
+		friendly |= board->bitboards[i];
+	}
+
+	while(friendlyKnights){
+		int i = bitScanForward(friendlyKnights);
+		friendlyKnights &= friendlyKnights-1;
+		u64 destinations = knightDestinations[i] & ~friendly;
+		addMovesToDest(destinations, i, ma);
+	}
+}
+
+static void genKingMoves(Board* board, MoveArray* ma){
+	int color = (board->turn == 0)? 0 : 6;
+
+	u64 friendly = 0;
+	for(int i = color; i<color+6; i++){
+		friendly |= board->bitboards[i];
+	}
+
+	int i = bitScanForward(board->bitboards[P_KING+color]);
+	u64 destinations = kingDestinations[i] & ~friendly;
+	addMovesToDest(destinations, i, ma);
 }

@@ -15,5 +15,4 @@ void moveArrayAppend(MoveArray *ma, Move move);
 //has to be run before generateMoves
 void generateMoveTables();
 
-//returns an array of all legal moves
-MoveArray generateMoves(Board* board); 
+void generateMoves(Board* board, MoveArray *ma);

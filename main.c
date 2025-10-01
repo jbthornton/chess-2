@@ -13,6 +13,11 @@ static bool isSquare(char* str){
 	if(str[1]<'1' || str[1]>'8') return false;
 	return true;
 }
+
+static int squareToIndex(char* str){
+	return boardIndex(str[0]-'a',str[1]-'1');
+}
+
 static bool isMove(char* str){
 	if(isSquare(str) && isSquare(&str[2])) return true;
 	return false;
@@ -29,12 +34,15 @@ void cli(){
 	u64 highlighted = (u64)0;
 	MoveArray legalMoves = moveArrayCreate();
 	while(!quit){
-		moveArrayDestroy(&legalMoves);
-		legalMoves = generateMoves(&board);
-		if(board.turn == 1) printf("---blacks turn---\n");
-		else printf("---whites turn---\n");
+		legalMoves.length = 0;//clear array but keep memory
+		generateMoves(&board, &legalMoves);
+		
+		//print board
+		if(board.turn == 1) printf(" ---black goes---\n");//"blacks turn" and "black to go" are not centered
+		else                printf(" ---white goes---\n");
 		printBoard(&board, highlighted);
 		highlighted = (u64)0;
+		
 		printf(" :");
 		fgets(input, sizeof(input), stdin);
 
@@ -49,16 +57,6 @@ void cli(){
 			}
 		}
 
-		if(strcmp(&input[start], "tst") == 0){
-			MoveArray ma = generateMoves(&board);
-			for(int i = 0; i<ma.length; i++){
-				printMove(ma.moves[i]);
-			}
-			printf("size:%d\n", ma.size);
-			printf("len:%d\n", ma.length);
-			continue;
-		}
-
 		if(strcmp(&input[start], "exit") == 0){
 			quit = true;
 			continue;
@@ -68,15 +66,18 @@ void cli(){
 			printf( " ---help---\n"
 					" help - show help menu\n"
 					" exit - exit program\n"
-					" <a-h><1-8><a-h><1-8> - make a move (eg d2d4)\n"
+					" <square><square> - make a move (eg b1c3)\n"
+					" <square> - show legal moves from a square (eg b1)\n"
+					" press enter to continue\n"
 					);
+			fgets(input, sizeof(input), stdin);
 			continue;
 		}
 
 		if(isMove(&input[start])){
 			Move move;
-			move.from = boardIndex(input[start]-'a',input[start+1]-'1');
-			move.to = boardIndex(input[start+2]-'a',input[start+3]-'1');
+			move.from = squareToIndex(&input[start]);
+			move.to = squareToIndex(&input[start+2]);
 			makeMove(&board, move);
 			BBSet(highlighted, move.to);
 			BBSet(highlighted, move.from);
@@ -84,9 +85,10 @@ void cli(){
 		}
 		
 		if(isSquare(&input[start])){
-			int from = boardIndex(input[start]-'a',input[start+1]-'1');
+			int from = squareToIndex(&input[start]);
 			for(int i = 0; i<legalMoves.length; i++){
-				if(legalMoves.moves[i].from == from) BBSet(highlighted, legalMoves.moves[i].to);
+				if(legalMoves.moves[i].from == from)
+					BBSet(highlighted, legalMoves.moves[i].to);
 			}
 			continue;
 		}
