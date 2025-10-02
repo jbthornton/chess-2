@@ -5,8 +5,9 @@
 #include "board.h"
 #include "move.h"
 #include "movegen.h"
-
 #include "print.h"
+
+#include "magic.h"
 
 static bool isSquare(char* str){
 	if(str[0]<'a' || str[0]>'h') return false;
@@ -71,6 +72,11 @@ void cli(){
 					" press enter to continue\n"
 					);
 			fgets(input, sizeof(input), stdin);
+			continue;
+		}
+
+		if(strcmp(&input[start], "magic") == 0){
+			magicSearch();
 			continue;
 		}
 

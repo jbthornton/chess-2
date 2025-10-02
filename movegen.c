@@ -2,8 +2,12 @@
 #include "movegen.h"
 #include "error.h"
 #include "print.h"
+#include "magic.h"
+
 static u64 knightDestinations[64];
 static u64 kingDestinations[64];
+static u64* rookDestinations[64];
+static u64* bishopDestinations[64];
 
 static const int index64[64] = {
     0,  1, 48,  2, 57, 49, 28,  3,
@@ -88,6 +92,8 @@ void generateMoveTables(){
 			}
 		}
 	}
+
+	loadMagics();
 }
 
 MoveArray moveArrayCreate(){
@@ -116,11 +122,13 @@ void moveArrayAppend(MoveArray* ma, Move move){
 static void genPawnMoves(Board* board, MoveArray* ma);
 static void genKnightMoves(Board* board, MoveArray* ma);
 static void genKingMoves(Board* board, MoveArray* ma);
+static void genSlidingMoves(Board* board, MoveArray* ma); //bishop rook and queen
 
 void generateMoves(Board* board, MoveArray* ma){
 	genPawnMoves(board, ma);
 	genKnightMoves(board, ma);
 	genKingMoves(board, ma);
+	genSlidingMoves(board, ma);
 }
 
 static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
@@ -205,4 +213,8 @@ static void genKingMoves(Board* board, MoveArray* ma){
 	int i = bitScanForward(board->bitboards[P_KING+color]);
 	u64 destinations = kingDestinations[i] & ~friendly;
 	addMovesToDest(destinations, i, ma);
+}
+
+static void genSlidingMoves(Board* board, MoveArray* ma){
+	
 }
