@@ -18,6 +18,14 @@ void printBB(u64 bb){
 	}
 }
 
+void printBin(u64 x){
+	for(int i = 63; i>0; i--){
+		if(BBGet(x, i)) printf("1");
+		else printf("0");
+	}
+	printf("\n");
+}
+
 void printBoard(Board *board, u64 highlighted){
 	char* pieceChars = "PNBRQKpnbrqk";
 	printf(" a b c d e f g h\n");

@@ -1,4 +1,7 @@
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
 #include "magic.h"
 #include "board.h"
@@ -12,6 +15,20 @@ typedef struct MagicNum{
 
 MagicNum rookMagics[64];
 MagicNum bishopMagics[64];
+
+
+static u64 u64Rand(){
+	u64 x = (u64)0;
+	x |= (random()&(0xFFFF));
+	x |= (random()&(0xFFFF))<<16;
+	x |= (random()&(0xFFFF))<<32;
+	x |= (random()&(0xFFFF))<<48;
+	return x;
+};
+
+static u64 u64RandFewbits(){
+	return u64Rand()&u64Rand()&u64Rand();
+}
 
 static u64 generateBishopMask(int square){
 	u64 mask = 0;
@@ -53,6 +70,11 @@ static bool testMagic(u64 magic, u64 occupancyMask, u64* mem, int memsize){
 }
 
 void magicSearch(){
+	srandom(time(0));
+	printBin(u64RandFewbits());
+	printBin(u64RandFewbits());
+	printBin(u64RandFewbits());
+	printBin(u64RandFewbits());
 	for(int i = 0; i<64; i++){
 		u64 rookMask = generateRookMask(i);
 		u64 bishopMask = generateBishopMask(i);
