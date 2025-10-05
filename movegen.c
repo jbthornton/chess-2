@@ -81,13 +81,13 @@ void moveArrayAppend(MoveArray* ma, Move move){
 static void genPawnMoves(Board* board, MoveArray* ma);
 static void genKnightMoves(Board* board, MoveArray* ma);
 static void genKingMoves(Board* board, MoveArray* ma);
-static void genSlidingMoves(Board* board, MoveArray* ma); //bishop rook and queen
+static void genRookMoves(Board* board, MoveArray* ma);
 
 void generateMoves(Board* board, MoveArray* ma){
 	genPawnMoves(board, ma);
 	genKnightMoves(board, ma);
 	genKingMoves(board, ma);
-	genSlidingMoves(board, ma);
+	genRookMoves(board, ma);
 }
 
 static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
@@ -174,6 +174,25 @@ static void genKingMoves(Board* board, MoveArray* ma){
 	addMovesToDest(destinations, i, ma);
 }
 
-static void genSlidingMoves(Board* board, MoveArray* ma){
-	
+static void genRookMoves(Board* board, MoveArray* ma){
+	int color = (board->turn == 0)? 0 : 6;
+	u64 friendlyRooks = board->bitboards[P_ROOK+color];
+
+	u64 occupancy = 0;
+	for(int i = 0; i<12; i++){
+		occupancy |= board->bitboards[i];
+	}
+
+	u64 friendly = 0;
+	for(int i = color; i<color+6; i++){
+		friendly |= board->bitboards[i];
+	}
+
+	while(friendlyRooks){
+		int square = bitScanForward(friendlyRooks);
+		friendlyRooks &= friendlyRooks-1;
+		u64 destinations = getRookDestinations(square, occupancy);
+		destinations &= ~friendly;
+		addMovesToDest(destinations, square, ma);
+	}
 }
