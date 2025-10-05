@@ -23,8 +23,10 @@ typedef struct Board{
 	int turn; //0 for white, 1 for black
 
 	//stuff for move generation
-	u64 friendlyBB;
-	u64 enemyBB;
+	u64 friendlyPieces;
+	u64 enemyPieces;
+	u64 occupancy;
+	int color;//0 when turn = white, 6 when turn = black
 }Board;
 
 //bit 0 in a bitboard represents a1, bit 1 b1, bit 2 c1, ect

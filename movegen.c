@@ -84,6 +84,18 @@ static void genKingMoves(Board* board, MoveArray* ma);
 static void genRookMoves(Board* board, MoveArray* ma);
 
 void generateMoves(Board* board, MoveArray* ma){
+	board->color = board->turn? 6 : 0;
+	board->occupancy = 0;
+	for(int i = 0; i<12; i++){
+		board->occupancy |= board->bitboards[i];
+	}
+
+	board->friendlyPieces = 0;
+	for(int i = board->color; i<board->color+6; i++){
+		board->friendlyPieces |= board->bitboards[i];
+	}
+	board->enemyPieces = board->occupancy & (~board->friendlyPieces);
+	
 	genPawnMoves(board, ma);
 	genKnightMoves(board, ma);
 	genKingMoves(board, ma);
@@ -111,88 +123,53 @@ static void addPawnMoves(u64 destinations, int shift, MoveArray* ma){
 
 static void genPawnMoves(Board* board, MoveArray* ma){
 	int shift    = (board->turn == 0)? 8 : -8;
-	int color    = (board->turn == 0)? 0 : 6;
 	u64 homeRank = (board->turn == 0)? RANK_2 : RANK_7;
 	u64 leftFile = (board->turn == 0)? FILE_A : FILE_H;
 	u64 rightFile = (board->turn == 0)? FILE_H : FILE_A;
 
-	u64 occupancy = 0;
-	for(int i = 0; i<12; i++){
-		occupancy |= board->bitboards[i];
-	}
-
-	u64 enemys = 0;
-	for(int i = color; i<color+6; i++){
-		enemys |= board->bitboards[i];
-	}
-	enemys = occupancy &(~enemys);
 
 	//forward
-	u64 destinations = BBSignedShift(board->bitboards[P_PAWN+color], shift)&(~occupancy);
+	u64 destinations = BBSignedShift(board->bitboards[P_PAWN+board->color], shift)&(~board->occupancy);
 	addPawnMoves(destinations, shift, ma);
 	
 	//double forward
-	destinations = BBSignedShift(board->bitboards[P_PAWN+color]&homeRank, shift*2)&(~occupancy);
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~board->occupancy);
 	addPawnMoves(destinations, shift*2, ma);
 
 	//left captures 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+color]&(~leftFile), shift-1)&(enemys);
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~leftFile), shift-1)&(board->enemyPieces);
 	addPawnMoves(destinations, shift-1, ma);
 
 	//right captures 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+color]&(~rightFile), shift+1)&(enemys);
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~rightFile), shift+1)&(board->enemyPieces);
 	addPawnMoves(destinations, shift+1, ma);
 }
 
 static void genKnightMoves(Board* board, MoveArray* ma){
-	int color = (board->turn == 0)? 0 : 6;
-	u64 friendlyKnights = board->bitboards[P_KNIGHT+color];
+	u64 friendlyKnights = board->bitboards[P_KNIGHT+board->color];
 	
-	u64 friendly = 0;
-	for(int i = color; i<color+6; i++){
-		friendly |= board->bitboards[i];
-	}
-
 	while(friendlyKnights){
 		int i = bitScanForward(friendlyKnights);
 		friendlyKnights &= friendlyKnights-1;
-		u64 destinations = knightDestinations[i] & ~friendly;
+		u64 destinations = knightDestinations[i] & ~board->friendlyPieces;
 		addMovesToDest(destinations, i, ma);
 	}
 }
 
 static void genKingMoves(Board* board, MoveArray* ma){
-	int color = (board->turn == 0)? 0 : 6;
-
-	u64 friendly = 0;
-	for(int i = color; i<color+6; i++){
-		friendly |= board->bitboards[i];
-	}
-
-	int i = bitScanForward(board->bitboards[P_KING+color]);
-	u64 destinations = kingDestinations[i] & ~friendly;
+	int i = bitScanForward(board->bitboards[P_KING+board->color]);
+	u64 destinations = kingDestinations[i] & ~board->friendlyPieces;
 	addMovesToDest(destinations, i, ma);
 }
 
 static void genRookMoves(Board* board, MoveArray* ma){
-	int color = (board->turn == 0)? 0 : 6;
-	u64 friendlyRooks = board->bitboards[P_ROOK+color];
-
-	u64 occupancy = 0;
-	for(int i = 0; i<12; i++){
-		occupancy |= board->bitboards[i];
-	}
-
-	u64 friendly = 0;
-	for(int i = color; i<color+6; i++){
-		friendly |= board->bitboards[i];
-	}
+	u64 friendlyRooks = board->bitboards[P_ROOK+board->color];
 
 	while(friendlyRooks){
 		int square = bitScanForward(friendlyRooks);
 		friendlyRooks &= friendlyRooks-1;
-		u64 destinations = getRookDestinations(square, occupancy);
-		destinations &= ~friendly;
+		u64 destinations = getRookDestinations(square, board->occupancy);
+		destinations &= ~board->friendlyPieces;
 		addMovesToDest(destinations, square, ma);
 	}
 }
