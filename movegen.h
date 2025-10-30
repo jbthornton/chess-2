@@ -18,4 +18,4 @@ void moveArrayAppend(MoveArray *ma, Move move);
 void generateMoveTables();
 
 void generateMoves(Board* board, MoveArray *ma);
-void runTests();
+bool isThreatened(Board* board, int square);

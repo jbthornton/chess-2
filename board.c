@@ -55,7 +55,7 @@ void loadFEN(Board *board, char* fen){
 		}
 	}
 	board->enPassant = -1;	
-	board->turn = 0;
+	board->whitesTurn = true;
 }
 
 static const int index64[64] = {

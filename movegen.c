@@ -78,6 +78,25 @@ void moveArrayAppend(MoveArray* ma, Move move){
 	ma->moves[ma->length++] = move;
 }
 
+bool isThreatened(Board* board, int square){
+	int enemyColor = board->whitesTurn ? 6 : 0;
+	u64 pawns  = board->bitboards[P_PAWN+enemyColor];
+	//white pieces shift 9, 7
+	//black shift -9 -7 
+	//opposite shift because we care about the enemy
+	u64 pawnDestinations = BBSignedShift(pawns & ~(FILE_A), (board->whitesTurn)? -9:7);
+	pawnDestinations |= BBSignedShift(pawns & ~(FILE_H), (board->whitesTurn)? -7:9);
+	if(BBGet(pawnDestinations, square)) return true;
+	
+	if(knightDestinations[square] & board->bitboards[P_KNIGHT+enemyColor]) return true;
+	if(getBishopDestinations(square, board->occupancy) & board->bitboards[P_BISHOP+enemyColor]) return true;
+	if(getRookDestinations(square, board->occupancy) & board->bitboards[P_ROOK+enemyColor]) return true;
+	if(getBishopDestinations(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
+	if(getRookDestinations(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
+	if(kingDestinations[square] & board->bitboards[P_KING+enemyColor]) return true;
+	return false;
+}
+
 static void genPawnMoves(Board* board, MoveArray* ma);
 static void genKnightMoves(Board* board, MoveArray* ma);
 static void genKingMoves(Board* board, MoveArray* ma);
@@ -85,8 +104,10 @@ static void genRookMoves(Board* board, MoveArray* ma);
 static void genBishopMoves(Board* board, MoveArray* ma);
 static void genQueenMoves(Board* board, MoveArray* ma);
 
+static void genCastlingMoves(Board* board, MoveArray* ma);
+
 void generateMoves(Board* board, MoveArray* ma){
-	board->color = board->turn? 6 : 0;
+	board->color = board->whitesTurn? 0 : 6;
 	board->occupancy = 0;
 	for(int i = 0; i<12; i++){
 		board->occupancy |= board->bitboards[i];
@@ -126,10 +147,10 @@ static void addPawnMoves(u64 destinations, int shift, MoveArray* ma){
 }
 
 static void genPawnMoves(Board* board, MoveArray* ma){
-	int shift    = (board->turn == 0)? 8 : -8;
-	u64 homeRank = (board->turn == 0)? RANK_2 : RANK_7;
-	u64 leftFile = (board->turn == 0)? FILE_A : FILE_H;
-	u64 rightFile = (board->turn == 0)? FILE_H : FILE_A;
+	int shift    = (board->whitesTurn)? 8 : -8;
+	u64 homeRank = (board->whitesTurn)? RANK_2 : RANK_7;
+	u64 leftFile = (board->whitesTurn)? FILE_A : FILE_H;
+	u64 rightFile = (board->whitesTurn)? FILE_H : FILE_A;
 
 
 	//forward

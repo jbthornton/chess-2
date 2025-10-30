@@ -18,7 +18,7 @@ void makeMove(Board* board, Move move){
 		BBReset(board->bitboards[captured], move.to);
 	
 	//en passant
-	board->color = board->turn? 6:0;
+	board->color = board->whitesTurn? 0:6;
 	//correctly handle en passant capture
 	if(piece-board->color == P_PAWN && move.to == board->enPassant){
 		int capturedSquare = move.to+8;
@@ -37,5 +37,5 @@ void makeMove(Board* board, Move move){
 		if(move.to-move.from == -16)
 			board->enPassant = move.to+8;
 	}
-	board->turn = !board->turn;
+	board->whitesTurn = !board->whitesTurn;
 }

@@ -30,7 +30,7 @@ void cli(){
 
 	char input[100];
 	loadFEN(&board, fen);
-	board.turn = 0;
+	
 	bool quit = false;
 	u64 highlighted = (u64)0;
 	MoveArray legalMoves = moveArrayCreate();
@@ -39,8 +39,8 @@ void cli(){
 		generateMoves(&board, &legalMoves);
 		
 		//print board
-		if(board.turn == 1) printf(" ---black goes---\n");//"blacks turn" and "black to go" are not centered
-		else                printf(" ---white goes---\n");
+		if(board.whitesTurn) printf(" ---white goes---\n");//"blacks turn" and "black to go" are not centered
+		else                 printf(" ---black goes---\n");
 		printBoard(&board, highlighted);
 		highlighted = (u64)0;
 		
@@ -77,6 +77,13 @@ void cli(){
 
 		if(strcmp(&input[start], "magic") == 0){
 			magicSearch();
+			continue;
+		}
+
+		if(strcmp(&input[start], "threat") == 0){
+			for(int i = 0; i<64; i++){
+				if(isThreatened(&board, i)) BBSet(highlighted, i);
+			}
 			continue;
 		}
 
