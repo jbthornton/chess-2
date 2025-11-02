@@ -54,6 +54,8 @@ void loadFEN(Board *board, char* fen){
 			index++;
 		}
 	}
+	for(int i = 0; i<4; i++)
+		board->canCastle[i] = true;
 	board->enPassant = -1;	
 	board->whitesTurn = true;
 }

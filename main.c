@@ -67,6 +67,8 @@ void cli(){
 			printf( " ---help---\n"
 					" help - show help menu\n"
 					" exit - exit program\n"
+					" threat - highlight threatened squares\n"
+					" index - print board indices\n"
 					" <square><square> - make a move (eg b1c3)\n"
 					" <square> - show legal moves from a square (eg b1)\n"
 					" press enter to continue\n"
@@ -84,6 +86,11 @@ void cli(){
 			for(int i = 0; i<64; i++){
 				if(isThreatened(&board, i)) BBSet(highlighted, i);
 			}
+			continue;
+		}
+
+		if(strcmp(&input[start], "index") == 0){
+			printIndices();
 			continue;
 		}
 

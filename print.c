@@ -60,6 +60,28 @@ void printBoard(Board *board, u64 highlighted){
 		printf("En Passant at %c%d \n", 'a'+(board->enPassant%8), 1+board->enPassant/8);
 }
 
+void printIndices(){
+	printf(" a b c d e f g h\n");
+	for(int y = 7; y>=0; y--){
+		printf("%c", '1'+y);
+		for(int x = 0; x<8; x++){
+			if((x+y)%2 == 0)
+				printf("\x1b[42;30m");//background color green, fg color black
+			else
+				printf("\x1b[47;30m");//background color white, fg color black
+			
+			printf("%d", y*8+x);
+			if(y*8+x<10)
+				printf(" ");
+
+			printf("\x1b[0m");//color reset
+		}
+		printf("%c", '1'+y);
+		printf("\n");
+	}
+	printf(" a b c d e f g h\n");
+}
+
 void printBoardDebug(Board *board){
 	printBoard(board, 0);
 	printf("bitboards\n");

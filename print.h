@@ -7,3 +7,4 @@ void printBin(u64 x);
 void printBoard(Board *board, u64 highlighted);
 void printBoardDebug(Board *board);
 void printMove(Move m);
+void printIndices();

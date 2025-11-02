@@ -20,7 +20,7 @@ typedef enum Piece{
 typedef struct Board{
 	int squares[64];
 	u64 bitboards[12];
-	bool castlingRights[4];//queenside, kingside, white, black
+	bool canCastle[4];//white queenside, white kingside, black queenside, black kingside
 	bool whitesTurn;
 	int enPassant; //target square for en passant, ignore if -1
 	

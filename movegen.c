@@ -125,6 +125,7 @@ void generateMoves(Board* board, MoveArray* ma){
 	genRookMoves(board, ma);
 	genBishopMoves(board, ma);
 	genQueenMoves(board, ma);
+	genCastlingMoves(board, ma);
 }
 
 static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
@@ -219,4 +220,53 @@ static void genQueenMoves(Board* board, MoveArray* ma){
 	destinations |= getBishopDestinations(square, board->occupancy);
 	destinations &= ~board->friendlyPieces;
 	addMovesToDest(destinations, square, ma);
+}
+
+static void genCastlingMoves(Board* board, MoveArray* ma){
+	//board.canCastle will be false if
+	//  the king or relavant rook has moved
+	//  the relevant rook has been captured
+	//the kings safety, the safety of the squares bewteen the king and the rook, and the emptyness of those squares must be checked here
+	int kingSquare = (board->whitesTurn)? 4 : 60;
+	if(board->canCastle[ (board->whitesTurn)? 0 : 2 ]){//queenside castling rights
+		int rookSquare = (board->whitesTurn)? 2 : 58;
+		bool canCastle = true;
+		for(int s = kingSquare; s>rookSquare; s--){
+			if(board->squares[s] != P_EMPTY && board->squares[s] != P_KING+board->color){
+				canCastle = false;
+				break;
+			}
+			if(isThreatened(board, s)){
+				canCastle = false;
+				break;
+			}
+		}
+		if(canCastle){
+				Move move;
+				move.from = kingSquare;
+				move.to = rookSquare;
+				moveArrayAppend(ma, move);
+		}
+	}
+
+	if(board->canCastle[ (board->whitesTurn)? 0 : 2 ]){//kingside castling rights
+		int rookSquare = (board->whitesTurn)? 6 : 62;
+		bool canCastle = true;
+		for(int s = kingSquare; s<rookSquare; s++){
+			if(board->squares[s] != P_EMPTY && board->squares[s] != P_KING+board->color){
+				canCastle = false;
+				break;
+			}
+			if(isThreatened(board, s)){
+				canCastle = false;
+				break;
+			}
+		}
+		if(canCastle){
+				Move move;
+				move.from = kingSquare;
+				move.to = rookSquare;
+				moveArrayAppend(ma, move);
+		}
+	}
 }
