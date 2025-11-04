@@ -69,7 +69,7 @@ void cli(){
 					" exit - exit program\n"
 					" threat - highlight threatened squares\n"
 					" index - print board indices\n"
-					" <square><square> - make a move (eg b1c3)\n"
+					" <square><square><promotion> - make a move (eg b1c3)\n"
 					" <square> - show legal moves from a square (eg b1)\n"
 					" press enter to continue\n"
 					);
@@ -98,6 +98,24 @@ void cli(){
 			Move move;
 			move.from = squareToIndex(&input[start]);
 			move.to = squareToIndex(&input[start+2]);
+			switch(tolower(input[start+4])){
+				case 'n':
+					move.promotion = P_KNIGHT;
+					break;
+				case 'r':
+					move.promotion = P_ROOK;
+					break;
+				case 'b':
+					move.promotion = P_BISHOP;
+					break;
+				case 'q':
+					move.promotion = P_QUEEN;
+					break;
+				default:
+					move.promotion = P_EMPTY;
+					break;
+			}
+			printMove(move);
 			makeMove(&board, move);
 			BBSet(highlighted, move.to);
 			BBSet(highlighted, move.from);
@@ -107,8 +125,10 @@ void cli(){
 		if(isSquare(&input[start])){
 			int from = squareToIndex(&input[start]);
 			for(int i = 0; i<legalMoves.length; i++){
-				if(legalMoves.moves[i].from == from)
+				if(legalMoves.moves[i].from == from){
 					BBSet(highlighted, legalMoves.moves[i].to);
+					printMove(legalMoves.moves[i]);
+				}
 			}
 			continue;
 		}

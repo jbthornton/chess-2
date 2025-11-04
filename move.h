@@ -4,6 +4,7 @@
 typedef struct Move{
 	int to;
 	int from;
+	int promotion;
 }Move;
 
 void makeMove(Board* board, Move move);

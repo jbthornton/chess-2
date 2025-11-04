@@ -138,12 +138,29 @@ static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
 }
 
 //used inside genPawnMoves
-static void addPawnMoves(u64 destinations, int shift, MoveArray* ma){
-	while(destinations){
-		int square = bitScanForward(destinations);
-		destinations &= destinations-1;//reset ls1b
-		Move m = (Move){.to = square, .from = square-shift};
+static void addPawnMoves(u64 promoRank, u64 destinations, int shift, MoveArray* ma){
+	u64 noPromotions = destinations & (~promoRank);
+	u64 promotions = destinations & promoRank;
+	
+	//normal destinations
+	while(noPromotions){
+		int square = bitScanForward(noPromotions);
+		noPromotions &= noPromotions-1;//reset ls1b
+		Move m = (Move){.to = square, .from = square-shift, .promotion = P_EMPTY};
 		moveArrayAppend(ma, m);
+	}
+	
+	//promotions
+	while(promotions){
+		int square = bitScanForward(promotions);
+		promotions &= promotions-1;//reset ls1b
+		//use this const array to avoid depending on the numerical values of the PIECES enum
+		const int promotionPieces[] = {P_QUEEN, P_KNIGHT, P_ROOK, P_BISHOP};
+		for(int i = 0; i<4; i++){
+			//.promotion is a peice type, dont add color
+			Move m = (Move){.to = square, .from = square-shift, .promotion = promotionPieces[i]};
+			moveArrayAppend(ma, m);
+		}
 	}
 }
 
@@ -152,25 +169,25 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 	u64 homeRank = (board->whitesTurn)? RANK_2 : RANK_7;
 	u64 leftFile = (board->whitesTurn)? FILE_A : FILE_H;
 	u64 rightFile = (board->whitesTurn)? FILE_H : FILE_A;
-
+	u64 promoRank = (board->whitesTurn)? RANK_8 : RANK_1;
 
 	//forward
 	u64 destinations = BBSignedShift(board->bitboards[P_PAWN+board->color], shift)&(~board->occupancy);
-	addPawnMoves(destinations, shift, ma);
+	addPawnMoves(promoRank, destinations, shift, ma);
 	
 	//double forward
 	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~board->occupancy);
-	addPawnMoves(destinations, shift*2, ma);
+	addPawnMoves(promoRank, destinations, shift*2, ma);
 	
 	u64 targets = board->enemyPieces;
 	if(board->enPassant != -1) BBSet(targets, board->enPassant);
 	//left captures 
 	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~leftFile), shift-1)&targets;
-	addPawnMoves(destinations, shift-1, ma);
+	addPawnMoves(promoRank, destinations, shift-1, ma);
 
 	//right captures 
 	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~rightFile), shift+1)&targets;
-	addPawnMoves(destinations, shift+1, ma);
+	addPawnMoves(promoRank, destinations, shift+1, ma);
 }
 
 static void genKnightMoves(Board* board, MoveArray* ma){

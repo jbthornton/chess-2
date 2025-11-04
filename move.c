@@ -26,6 +26,13 @@ void makeMove(Board* board, Move move){
 	
 	movePiece(board, move.from, move.to);
 	
+	//Promotion
+	if(pieceType == P_PAWN && move.promotion != P_EMPTY){
+		board->squares[move.to] = move.promotion+board->color;
+		BBReset(board->bitboards[piece], move.to);
+		BBSet(board->bitboards[move.promotion+board->color], move.to);
+	}
+	
 	//Castling
 	if(pieceType == P_KING && abs(move.to-move.from)>1){
 		//move the rook
@@ -72,6 +79,7 @@ void makeMove(Board* board, Move move){
 		board->canCastle[ks] = false;//kingside
 		board->canCastle[ks+1] = false;//queenside
 	}
+
 	if(pieceType == P_ROOK){
 		switch(move.from){
 			case 0: //a1
@@ -88,6 +96,7 @@ void makeMove(Board* board, Move move){
 				break;
 		}
 	}
+
 	if(capturedType == P_ROOK){
 		switch(move.to){
 			case 0: //a1
@@ -104,5 +113,6 @@ void makeMove(Board* board, Move move){
 				break;
 		}
 	}
+	
 	board->whitesTurn = !board->whitesTurn;
 }

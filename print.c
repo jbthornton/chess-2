@@ -2,6 +2,11 @@
 
 #include "print.h"
 
+static char pieceToChar(int piece){
+	if(piece<-1 || piece>P_KING+6) return '?';
+	const char* pieceChars = " PNBRQKpnbrqk";
+	return pieceChars[piece+1];
+}
 void printBB(u64 bb){
 	printf("  a b c d e f g h\n");//header
 	for(int y = 7; y>=0; y--){
@@ -27,7 +32,6 @@ void printBin(u64 x){
 }
 
 void printBoard(Board *board, u64 highlighted){
-	char* pieceChars = "PNBRQKpnbrqk";
 	printf(" a b c d e f g h\n");
 	for(int y = 7; y>=0; y--){
 		printf("%c", '1'+y);
@@ -40,20 +44,9 @@ void printBoard(Board *board, u64 highlighted){
 				printf("\x1b[43;30m");
 
 			int piece = board->squares[boardIndex(x,y)];
-			if(piece == P_EMPTY){
-				printf("  \x1b[0m");
-				continue;
-			}
-			if(piece>=0 && piece<12){
-				printf("%c ", pieceChars[piece]);
-			}
-			else
-				printf("!?");
-
-			printf("\x1b[0m");//color reset
+			printf("%c \x1b[0m", pieceToChar(piece));
 		}
-		printf("%c", '1'+y);
-		printf("\n");
+		printf("%c\n", '1'+y);
 	}
 	printf(" a b c d e f g h\n");
 	if(board->enPassant != -1)
@@ -76,8 +69,7 @@ void printIndices(){
 
 			printf("\x1b[0m");//color reset
 		}
-		printf("%c", '1'+y);
-		printf("\n");
+		printf("%c\n", '1'+y);
 	}
 	printf(" a b c d e f g h\n");
 }
@@ -95,5 +87,6 @@ void printBoardDebug(Board *board){
 }
 
 void printMove(Move m){
-	printf("%c%c%c%c\n", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8));
+	if(m.promotion == P_PAWN) printf("%c%c%c%c\n", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8));
+	else printf("%c%c%c%c%c\n", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8), pieceToChar(m.promotion));
 }
