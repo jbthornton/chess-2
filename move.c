@@ -17,7 +17,6 @@ static void movePiece(Board* board, int from, int to){
 	if(captured != P_EMPTY)
 		BBReset(board->bitboards[captured], to);
 }
-
 void makeMove(Board* board, Move move){
 	int piece = board->squares[move.from];
 	int captured = board->squares[move.to];
@@ -115,4 +114,5 @@ void makeMove(Board* board, Move move){
 	}
 	
 	board->whitesTurn = !board->whitesTurn;
+	updatePerspectiveVariables(board);
 }

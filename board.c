@@ -58,6 +58,7 @@ void loadFEN(Board *board, char* fen){
 		board->canCastle[i] = true;
 	board->enPassant = -1;	
 	board->whitesTurn = true;
+	updatePerspectiveVariables(board);
 }
 
 static const int index64[64] = {
@@ -108,4 +109,19 @@ int countBits(u64 x){
 		x&=x-1;//reset ls1b
 	}
 	return count;
+}
+
+void updatePerspectiveVariables(Board* board){
+	board->color = board->whitesTurn? 0 : 6;
+	board->enemyColor = board->whitesTurn? 6 : 0;
+	board->occupancy = 0;
+	for(int i = 0; i<12; i++){
+		board->occupancy |= board->bitboards[i];
+	}
+
+	board->friendlyPieces = 0;
+	for(int i = board->color; i<board->color+6; i++){
+		board->friendlyPieces |= board->bitboards[i];
+	}
+	board->enemyPieces = board->occupancy & (~board->friendlyPieces);
 }

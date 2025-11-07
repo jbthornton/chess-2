@@ -19,4 +19,5 @@ $(BINNAME):$(OBJ)
 
 clean:
 	rm -f $(OBJ)
+	rm -f $(DEPS)
 	rm -f $(BINNAME)

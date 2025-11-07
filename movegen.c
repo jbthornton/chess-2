@@ -78,14 +78,13 @@ void moveArrayAppend(MoveArray* ma, Move move){
 	ma->moves[ma->length++] = move;
 }
 
-bool isThreatened(Board* board, int square){
-	int enemyColor = board->whitesTurn ? 6 : 0;
-	u64 pawns  = board->bitboards[P_PAWN+enemyColor];
+bool squareThreatenedBy(Board* board, int square, int enemyColor){
+	u64 pawns = board->bitboards[P_PAWN+enemyColor];
 	//white pieces shift 9, 7
 	//black shift -9 -7 
 	//opposite shift because we care about the enemy
-	u64 pawnDestinations = BBSignedShift(pawns & ~(FILE_A), (board->whitesTurn)? -9:7);
-	pawnDestinations |= BBSignedShift(pawns & ~(FILE_H), (board->whitesTurn)? -7:9);
+	u64 pawnDestinations = BBSignedShift(pawns & ~(FILE_A), (enemyColor == 6)? -9:7);
+	pawnDestinations |= BBSignedShift(pawns & ~(FILE_H), (enemyColor == 6)? -7:9);
 	if(BBGet(pawnDestinations, square)) return true;
 	
 	if(knightDestinations[square] & board->bitboards[P_KNIGHT+enemyColor]) return true;
@@ -107,18 +106,6 @@ static void genQueenMoves(Board* board, MoveArray* ma);
 static void genCastlingMoves(Board* board, MoveArray* ma);
 
 void generateMoves(Board* board, MoveArray* ma){
-	board->color = board->whitesTurn? 0 : 6;
-	board->occupancy = 0;
-	for(int i = 0; i<12; i++){
-		board->occupancy |= board->bitboards[i];
-	}
-
-	board->friendlyPieces = 0;
-	for(int i = board->color; i<board->color+6; i++){
-		board->friendlyPieces |= board->bitboards[i];
-	}
-	board->enemyPieces = board->occupancy & (~board->friendlyPieces);
-	
 	genPawnMoves(board, ma);
 	genKnightMoves(board, ma);
 	genKingMoves(board, ma);
@@ -232,6 +219,7 @@ static void genBishopMoves(Board* board, MoveArray* ma){
 }
 
 static void genQueenMoves(Board* board, MoveArray* ma){
+	if(!board->bitboards[P_QUEEN+board->color]) return;
 	int square = bitScanForward(board->bitboards[P_QUEEN+board->color]);
 	u64 destinations = getRookDestinations(square, board->occupancy);
 	destinations |= getBishopDestinations(square, board->occupancy);
@@ -245,7 +233,7 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 	//  the relevant rook has been captured
 	//the kings safety, the safety of the squares bewteen the king and the rook, and the emptyness of those squares must be checked here
 	int kingSquare = (board->whitesTurn)? 4 : 60;
-	if(board->canCastle[ (board->whitesTurn)? 0 : 2 ]){//queenside castling rights
+	if(board->canCastle[ (board->whitesTurn)? 0 : 2 ]){//check queenside castling rights
 		int rookSquare = (board->whitesTurn)? 2 : 58;
 		bool canCastle = true;
 		for(int s = kingSquare; s>rookSquare; s--){
@@ -253,7 +241,7 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 				canCastle = false;
 				break;
 			}
-			if(isThreatened(board, s)){
+			if(squareThreatenedBy(board, s, board->enemyColor)){
 				canCastle = false;
 				break;
 			}
@@ -274,7 +262,7 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 				canCastle = false;
 				break;
 			}
-			if(isThreatened(board, s)){
+			if(squareThreatenedBy(board, s, board->enemyColor)){
 				canCastle = false;
 				break;
 			}

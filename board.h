@@ -25,10 +25,12 @@ typedef struct Board{
 	int enPassant; //target square for en passant, ignore if -1
 	
 	//stuff for move generation
+	int color;//0 when turn = white, 6 when turn = black
+	int enemyColor;
 	u64 friendlyPieces;
 	u64 enemyPieces;
 	u64 occupancy;
-	int color;//0 when turn = white, 6 when turn = black
+
 }Board;
 
 //bit 0 in a bitboard represents a1, bit 1 b1, bit 2 c1, ect
@@ -67,3 +69,4 @@ void loadFEN(Board *board, char* fen);
 int bitScanForward(u64 x);
 u64 BBSignedShift(u64 x, int s);
 int countBits(u64 x);
+void updatePerspectiveVariables(Board *board);

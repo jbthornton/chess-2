@@ -5,6 +5,7 @@
 #include "board.h"
 #include "move.h"
 #include "movegen.h"
+#include "search.h"
 #include "print.h"
 
 #include "magic.h"
@@ -84,13 +85,18 @@ void cli(){
 
 		if(strcmp(&input[start], "threat") == 0){
 			for(int i = 0; i<64; i++){
-				if(isThreatened(&board, i)) BBSet(highlighted, i);
+				if(squareThreatenedBy(&board, i, board.enemyColor)) BBSet(highlighted, i);
 			}
 			continue;
 		}
 
 		if(strcmp(&input[start], "index") == 0){
 			printIndices();
+			continue;
+		}
+
+		if(strcmp(&input[start], "perft") == 0){
+			perft();
 			continue;
 		}
 
