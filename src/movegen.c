@@ -207,12 +207,15 @@ static void genBishopMoves(Board* board, MoveArray* ma){
 }
 
 static void genQueenMoves(Board* board, MoveArray* ma){
-	if(!board->bitboards[P_QUEEN+board->color]) return;
-	int square = bitScanForward(board->bitboards[P_QUEEN+board->color]);
-	u64 destinations = getRookDestinations(square, board->occupancy);
-	destinations |= getBishopDestinations(square, board->occupancy);
-	destinations &= ~board->friendlyPieces;
-	addMovesToDest(destinations, square, ma);
+	u64 friendlyQueens = board->bitboards[P_QUEEN+board->color];
+	while(friendlyQueens){
+		int square = bitScanForward(friendlyQueens);
+		friendlyQueens &= friendlyQueens-1;
+		u64 destinations = getRookDestinations(square, board->occupancy);
+		destinations |= getBishopDestinations(square, board->occupancy);
+		destinations &= ~board->friendlyPieces;
+		addMovesToDest(destinations, square, ma);
+	}
 }
 
 static void genCastlingMoves(Board* board, MoveArray* ma){
