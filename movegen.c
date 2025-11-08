@@ -1,7 +1,4 @@
-#include <malloc.h>
 #include "movegen.h"
-#include "error.h"
-#include "print.h"
 #include "magic.h"
 
 static u64 knightDestinations[64];
@@ -9,7 +6,7 @@ static u64 kingDestinations[64];
 static u64* rookDestinations[64];
 static u64* bishopDestinations[64];
 
-void generateMoveTables(){
+void fillMoveTables(){
 	const int knightOffsets[16] = {
 		 1, 2,
 		 1,-2,
@@ -21,6 +18,7 @@ void generateMoveTables(){
 		-2, 1,
 		-2,-1,
 	};
+	
 	const int kingOffsets[16] = {
 		 1,-1,
 		 1, 0,
@@ -33,16 +31,18 @@ void generateMoveTables(){
 		-1, 0,
 	 	-1, 1,	
 	};
-	//knight move tables
+	
 	for(int x = 0; x<8; x++){
 		for(int y = 0; y<8; y++){
 			int i = BOARD_INDEX(x,y);
+			
 			knightDestinations[i] = 0;
 			for(int j = 0; j<16; j+=2){
 				int dx = x +knightOffsets[j];
 				int dy = y +knightOffsets[j+1];
 				if(dx>=0 && dx<8 && dy>=0 && dy<8) SET_BIT64(knightDestinations[i], BOARD_INDEX(dx, dy));
 			}
+
 			kingDestinations[i] = (u64)0;
 			for(int j = 0; j<16; j+=2){
 				int dx = x +kingOffsets[j];
@@ -55,26 +55,7 @@ void generateMoveTables(){
 	fillMagicTables();
 }
 
-MoveArray moveArrayCreate(){
-	MoveArray ma;
-	ma.length = 0;
-	ma.size = 10;//revisit this later
-	ma.moves = malloc(sizeof(Move)*ma.size);
-	if(ma.moves == NULL) error("failed to allocate memory for moveArray\n");
-	return ma;	
-}
-
-void moveArrayDestroy(MoveArray* ma){
-	free(ma->moves);
-	ma->moves = NULL;
-}
-
 void moveArrayAppend(MoveArray* ma, Move move){
-	if(ma->length>=ma->size){
-		ma->size*=1.5;
-		ma->moves = realloc(ma->moves, sizeof(Move)*ma->size);
-		if(ma->moves == NULL) error("failed to allocate memory for moveArray\n");
-	}
 	ma->moves[ma->length++] = move;
 }
 
@@ -102,7 +83,6 @@ static void genKingMoves(Board* board, MoveArray* ma);
 static void genRookMoves(Board* board, MoveArray* ma);
 static void genBishopMoves(Board* board, MoveArray* ma);
 static void genQueenMoves(Board* board, MoveArray* ma);
-
 static void genCastlingMoves(Board* board, MoveArray* ma);
 
 void generateMoves(Board* board, MoveArray* ma){

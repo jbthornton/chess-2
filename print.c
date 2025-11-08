@@ -7,6 +7,7 @@ static char pieceToChar(int piece){
 	const char* pieceChars = " PNBRQKpnbrqk";
 	return pieceChars[piece+1];
 }
+
 void printBB(u64 bb){
 	printf("  a b c d e f g h\n");//header
 	for(int y = 7; y>=0; y--){
@@ -40,8 +41,9 @@ void printBoard(Board *board, u64 highlighted){
 				printf("\x1b[42;30m");//background color green, fg color black
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
+			
 			if(GET_BIT64(highlighted, BOARD_INDEX(x, y)))
-				printf("\x1b[43;30m");
+				printf("\x1b[43;30m");//background color yellow, fg color black
 
 			int piece = board->squares[BOARD_INDEX(x,y)];
 			printf("%c \x1b[0m", pieceToChar(piece));
@@ -63,9 +65,8 @@ void printIndices(){
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
 			
-			printf("%d", y*8+x);
-			if(y*8+x<10)
-				printf(" ");
+			printf("%d", BOARD_INDEX(x,y));
+			if(BOARD_INDEX(x,y)<10) printf(" ");
 
 			printf("\x1b[0m");//color reset
 		}

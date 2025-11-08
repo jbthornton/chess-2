@@ -34,9 +34,10 @@ void cli(){
 	
 	bool quit = false;
 	u64 highlighted = (u64)0;
-	MoveArray legalMoves = moveArrayCreate();
+	MoveArray legalMoves;
+	legalMoves.length = 0;
 	while(!quit){
-		legalMoves.length = 0;//clear array but keep memory
+		legalMoves.length = 0;//clear array
 		generateMoves(&board, &legalMoves);
 		
 		//print board
@@ -141,11 +142,10 @@ void cli(){
 
 		printf("command unrecognised\n");
 	}
-	moveArrayDestroy(&legalMoves);
 }
 
 int main(int argc, char* argv[]){
-	generateMoveTables();
+	fillMoveTables();
 	cli();
 	return 0;
 }
