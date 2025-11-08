@@ -102,18 +102,20 @@ void cli(){
 				STARTPOS_FEN,
 				STARTPOS_FEN,
 				STARTPOS_FEN,
-				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"
+				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0",
+				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0",
 			};
 			int results[] = {
 				8902,
 				197281,
 				4865609,
-			 	4085603,	
+			 	4085603,
+				193690690,
 			};
 			int depths[] = {
-				3,4,5,4
+				3,4,5,4,5
 			};
-			for(int i = 0; i<4; i++){
+			for(int i = 0; i<5; i++){
 				printf("%d) ", i);
 				perft(positions[i], depths[i], results[i], false);
 			}

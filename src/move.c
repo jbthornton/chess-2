@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 static void movePiece(Board* board, int from, int to){
 	int piece = board->squares[from];
@@ -20,9 +21,8 @@ static void movePiece(Board* board, int from, int to){
 void makeMove(Board* board, Move move){
 	int piece = board->squares[move.from];
 	int captured = board->squares[move.to];
-	int pieceType = piece-board->color;
-	int capturedType = captured-board->color;
-	
+	int pieceType = piece-(board->color);
+	int capturedType = captured-(board->enemyColor);
 	movePiece(board, move.from, move.to);
 	
 	//Promotion
@@ -51,7 +51,6 @@ void makeMove(Board* board, Move move){
 	}
 
 	//En Passant
-	board->color = board->whitesTurn? 0:6;
 	//correctly handle en passant capture
 	if(pieceType == P_PAWN && move.to == board->enPassant){
 		int capturedSquare = move.to+8;
