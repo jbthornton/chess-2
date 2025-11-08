@@ -3,4 +3,4 @@
 #include "move.h"
 #include "movegen.h"
 
-void perft();//tests move generator
+void perft(char* fen, int depth, int expected);

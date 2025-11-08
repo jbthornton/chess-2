@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "board.h"
 #include "move.h"
@@ -25,13 +26,16 @@ static bool isMove(char* str){
 	return false;
 }
 
-void cli(){
-	char* fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-	Board board;
+static void getInput(const char* prompt, char* input){
+	printf("%s", prompt);
+	fgets(input, sizeof(input), stdin);
+}
 
-	char input[100];
-	loadFEN(&board, fen);
+void cli(){
+	Board board;
+	loadFEN(&board, STARTPOS_FEN);
 	
+	char input[100];
 	bool quit = false;
 	u64 highlighted = (u64)0;
 	MoveArray legalMoves;
@@ -45,9 +49,8 @@ void cli(){
 		else                 printf(" ---black goes---\n");
 		printBoard(&board, highlighted);
 		highlighted = (u64)0;
-		
-		printf(" :");
-		fgets(input, sizeof(input), stdin);
+
+		getInput(" :", input);
 
 		//remove whitespace characters from input	
 		int start = -1;
@@ -71,6 +74,7 @@ void cli(){
 					" exit - exit program\n"
 					" threat - highlight threatened squares\n"
 					" index - print board indices\n"
+					" fen - print board fen\n"
 					" <square><square><promotion> - make a move (eg b1c3)\n"
 					" <square> - show legal moves from a square (eg b1)\n"
 					" press enter to continue\n"
@@ -97,7 +101,16 @@ void cli(){
 		}
 
 		if(strcmp(&input[start], "perft") == 0){
-			perft();
+			getInput(" depth:", input);
+			int depth = atoi(input);
+			perft(STARTPOS_FEN, depth, 0);
+			continue;
+		}
+
+		if(strcmp(&input[start], "fen") == 0){
+			char fen[MAX_FEN_SIZE];
+			makeFen(&board, fen);
+			printf("%s\n", fen);
 			continue;
 		}
 

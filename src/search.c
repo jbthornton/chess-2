@@ -4,27 +4,16 @@
 #include "print.h"
 
 static int perftSearch(Board board, Move move, int depth);
-static void rperft(int depth, char* fen);
 
-void perft(){
-	char* fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-	int depth = 5;
- 	int expected = 4865609; 
-	rperft(1, fen);
-	rperft(2, fen);
-	rperft(3, fen);
-	rperft(4, fen);
-	rperft(5, fen);
-}
-
-static void rperft(int depth, char* fen){
+void perft(char* fen, int depth, int expected){
 	Board board;
 	loadFEN(&board, fen);
 	Move m;
 	m.to = 0;
 	m.from = 0;
 	int result = perftSearch(board, m, depth);
-	printf("Depth: %d, Result: %d\n", depth, result);
+	if(expected != 0) printf("Depth: %d, %d/%d, Error: %d\n", depth, result, expected, result-expected);
+	if(expected == 0) printf("Depth: %d, %d\n", depth, result);
 }
 
 static int perftSearch(Board board, Move move, int depth){

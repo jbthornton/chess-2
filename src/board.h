@@ -35,8 +35,12 @@ typedef uint64_t u64;
 #define FILE_G C64(0x4040404040404040)
 #define FILE_H C64(0x8080808080808080)
 
+#define MAX_FEN_SIZE 100 //assumes fullmove counter < 10^14
+#define STARTPOS_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+
 //a black peice is a white peice +6
 typedef enum Piece{
+	P_NULL = -2,
 	P_EMPTY = -1, //for squarewise board only
 	P_PAWN,
 	P_KNIGHT,
@@ -52,6 +56,8 @@ typedef struct Board{
 	bool canCastle[4];//white queenside, white kingside, black queenside, black kingside
 	bool whitesTurn;
 	int enPassant; //target square for en passant, ignore if -1
+	int halfmoveCounter;
+	int fullmoveCounter;
 	
 	//stuff for move generation
 	int color;//0 when turn = white, 6 when turn = black
@@ -63,6 +69,7 @@ typedef struct Board{
 }Board;
 
 void loadFEN(Board *board, char* fen);
+void makeFen(Board *board, char* fen);
 
 int bitScanForward(u64 x);
 u64 BBSignedShift(u64 x, int s);

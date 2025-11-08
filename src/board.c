@@ -1,8 +1,10 @@
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include "board.h"
 #include "error.h"
+#include "print.h"
 
 void loadFEN(Board *board, char* fen){
 	int index = 0;
@@ -59,6 +61,36 @@ void loadFEN(Board *board, char* fen){
 	board->enPassant = -1;	
 	board->whitesTurn = true;
 	updatePerspectiveVariables(board);
+}
+
+void makeFen(Board *board, char* fen){
+	int index = 0;
+	for(int y = 7; y>=0; y--){
+		int emptyCount = 0;
+		for(int x = 0; x<8; x++){
+			int piece = board->squares[BOARD_INDEX(x,y)];
+			if(piece == P_EMPTY) emptyCount++;
+			if(piece != P_EMPTY){
+				if(emptyCount != 0) fen[index++] = '0' + emptyCount;
+				emptyCount = 0;
+				fen[index++] = pieceToChar(piece);
+			}
+		}
+		if(emptyCount != 0) fen[index++] = '0' + emptyCount;
+		if(y != 0) fen[index++] = '/';
+	}
+
+	fen[index++] = ' ';
+	fen[index++] = (board->whitesTurn)? 'w':'b';
+
+	fen[index++] = ' ';
+	if(board->canCastle[0]) fen[index++] = 'K';
+	if(board->canCastle[1]) fen[index++] = 'Q';
+	if(board->canCastle[2]) fen[index++] = 'k';
+	if(board->canCastle[3]) fen[index++] = 'q';
+	if(fen[index-1] == ' ') fen[index++] = '-';
+
+	sprintf(&fen[index], " %d %d", board->halfmoveCounter, board->fullmoveCounter);
 }
 
 static const int index64[64] = {

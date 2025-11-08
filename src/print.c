@@ -2,7 +2,7 @@
 
 #include "print.h"
 
-static char pieceToChar(int piece){
+char pieceToChar(int piece){
 	if(piece<-1 || piece>P_KING+6) return '?';
 	const char* pieceChars = " PNBRQKpnbrqk";
 	return pieceChars[piece+1];
