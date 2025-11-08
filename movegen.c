@@ -36,18 +36,18 @@ void generateMoveTables(){
 	//knight move tables
 	for(int x = 0; x<8; x++){
 		for(int y = 0; y<8; y++){
-			int i = boardIndex(x,y);
+			int i = BOARD_INDEX(x,y);
 			knightDestinations[i] = 0;
 			for(int j = 0; j<16; j+=2){
 				int dx = x +knightOffsets[j];
 				int dy = y +knightOffsets[j+1];
-				if(dx>=0 && dx<8 && dy>=0 && dy<8) BBSet(knightDestinations[i], boardIndex(dx, dy));
+				if(dx>=0 && dx<8 && dy>=0 && dy<8) SET_BIT64(knightDestinations[i], BOARD_INDEX(dx, dy));
 			}
 			kingDestinations[i] = (u64)0;
 			for(int j = 0; j<16; j+=2){
 				int dx = x +kingOffsets[j];
 				int dy = y +kingOffsets[j+1];
-				if(dx>=0 && dx<8 && dy>=0 && dy<8) BBSet(kingDestinations[i], boardIndex(dx, dy));
+				if(dx>=0 && dx<8 && dy>=0 && dy<8) SET_BIT64(kingDestinations[i], BOARD_INDEX(dx, dy));
 			}
 		}
 	}
@@ -85,7 +85,7 @@ bool squareThreatenedBy(Board* board, int square, int enemyColor){
 	//opposite shift because we care about the enemy
 	u64 pawnDestinations = BBSignedShift(pawns & ~(FILE_A), (enemyColor == 6)? -9:7);
 	pawnDestinations |= BBSignedShift(pawns & ~(FILE_H), (enemyColor == 6)? -7:9);
-	if(BBGet(pawnDestinations, square)) return true;
+	if(GET_BIT64(pawnDestinations, square)) return true;
 	
 	if(knightDestinations[square] & board->bitboards[P_KNIGHT+enemyColor]) return true;
 	if(getBishopDestinations(square, board->occupancy) & board->bitboards[P_BISHOP+enemyColor]) return true;
@@ -167,7 +167,7 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 	addPawnMoves(promoRank, destinations, shift*2, ma);
 	
 	u64 targets = board->enemyPieces;
-	if(board->enPassant != -1) BBSet(targets, board->enPassant);
+	if(board->enPassant != -1) SET_BIT64(targets, board->enPassant);
 	//left captures 
 	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~leftFile), shift-1)&targets;
 	addPawnMoves(promoRank, destinations, shift-1, ma);

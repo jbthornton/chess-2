@@ -12,10 +12,10 @@ static void movePiece(Board* board, int from, int to){
 	board->squares[from] = P_EMPTY;
 
 	//update bitboards
-	BBReset(board->bitboards[piece], from);
-	BBSet(board->bitboards[piece], to);
+	RESET_BIT64(board->bitboards[piece], from);
+	SET_BIT64(board->bitboards[piece], to);
 	if(captured != P_EMPTY)
-		BBReset(board->bitboards[captured], to);
+		RESET_BIT64(board->bitboards[captured], to);
 }
 void makeMove(Board* board, Move move){
 	int piece = board->squares[move.from];
@@ -28,8 +28,8 @@ void makeMove(Board* board, Move move){
 	//Promotion
 	if(pieceType == P_PAWN && move.promotion != P_EMPTY){
 		board->squares[move.to] = move.promotion+board->color;
-		BBReset(board->bitboards[piece], move.to);
-		BBSet(board->bitboards[move.promotion+board->color], move.to);
+		RESET_BIT64(board->bitboards[piece], move.to);
+		SET_BIT64(board->bitboards[move.promotion+board->color], move.to);
 	}
 	
 	//Castling
@@ -59,7 +59,7 @@ void makeMove(Board* board, Move move){
 			capturedSquare = move.to-8;
 		captured = board->squares[capturedSquare];
 		board->squares[capturedSquare] = P_EMPTY;
-		BBReset(board->bitboards[captured], capturedSquare);
+		RESET_BIT64(board->bitboards[captured], capturedSquare);
 	}
 
 	//set en passant target square if move was a double pawn push

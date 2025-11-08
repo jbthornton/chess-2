@@ -12,7 +12,7 @@ void printBB(u64 bb){
 	for(int y = 7; y>=0; y--){
 		printf("%c", '1'+y);
 		for(int x = 0; x<8; x++){
-			if(BBGet(bb, boardIndex(x, y)))
+			if(GET_BIT64(bb, BOARD_INDEX(x, y)))
 				printf("\x1b[42;30m");//background color green, fg color black
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
@@ -25,7 +25,7 @@ void printBB(u64 bb){
 
 void printBin(u64 x){
 	for(int i = 63; i>0; i--){
-		if(BBGet(x, i)) printf("1");
+		if(GET_BIT64(x, i)) printf("1");
 		else printf("0");
 	}
 	printf("\n");
@@ -40,10 +40,10 @@ void printBoard(Board *board, u64 highlighted){
 				printf("\x1b[42;30m");//background color green, fg color black
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
-			if(BBGet(highlighted, boardIndex(x, y)))
+			if(GET_BIT64(highlighted, BOARD_INDEX(x, y)))
 				printf("\x1b[43;30m");
 
-			int piece = board->squares[boardIndex(x,y)];
+			int piece = board->squares[BOARD_INDEX(x,y)];
 			printf("%c \x1b[0m", pieceToChar(piece));
 		}
 		printf("%c\n", '1'+y);

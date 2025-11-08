@@ -191,7 +191,7 @@ static u64 attackMask(int square, bool bishop){
 			y+=dy;
 			if((x+dx)<0 || (x+dx)>=8 || (y+dy)<0 || (y+dy)>=8)
 				break;
-			BBSet(mask, boardIndex(x,y));
+			SET_BIT64(mask, BOARD_INDEX(x,y));
 		}
 	}
 	return mask;
@@ -202,7 +202,7 @@ static u64 blockersFromMask(u64 mask, int x){//x should be in the range 0-2^(num
 	int i = 0;
 	while(mask){
 		if(x&(1<<i))
-			BBSet(blockers, bitScanForward(mask));
+			SET_BIT64(blockers, bitScanForward(mask));
 		mask &= mask-1;
 		i++;
 	}
@@ -294,8 +294,8 @@ static u64 destinationsBitboard(int square, u64 blockers, bool bishop){
 			y+=dy;
 			if( (x)<0 || (x)>=8 || (y)<0 || (y)>=8)	
 				break;
-			BBSet(destinations, boardIndex(x,y));
-			if(BBGet(blockers, boardIndex(x,y)))
+			SET_BIT64(destinations, BOARD_INDEX(x,y));
+			if(GET_BIT64(blockers, BOARD_INDEX(x,y)))
 				break;
 		}
 	}

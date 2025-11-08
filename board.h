@@ -5,46 +5,17 @@
 typedef uint64_t u64;
 #define C64(x) (UINT64_C(x)) //used for defining u64 constants
 
-//a black peice is a white peice +6
-typedef enum Piece{
-	P_EMPTY = -1, //for squarewise board only
-	P_PAWN,
-	P_KNIGHT,
-	P_BISHOP,
-	P_ROOK,
-	P_QUEEN,
-	P_KING
-}Piece;
-
-
-typedef struct Board{
-	int squares[64];
-	u64 bitboards[12];
-	bool canCastle[4];//white queenside, white kingside, black queenside, black kingside
-	bool whitesTurn;
-	int enPassant; //target square for en passant, ignore if -1
-	
-	//stuff for move generation
-	int color;//0 when turn = white, 6 when turn = black
-	int enemyColor;
-	u64 friendlyPieces;
-	u64 enemyPieces;
-	u64 occupancy;
-
-}Board;
-
 //bit 0 in a bitboard represents a1, bit 1 b1, bit 2 c1, ect
 //board indices are in the same order
 /*
 	8 9 ...
 	0 1 2 3 4 5 6 7
 */
+#define BOARD_INDEX(x,y) (((y)*8)+(x))
 
-#define boardIndex(x,y) (((y)*8)+(x))
-#define BBGet(bb, index) ((bb)&((u64)1<<(index)))
-#define BBSet(bb, index) ((bb)|=((u64)1<<(index)))
-#define BBReset(bb, index) ((bb)&=~((u64)1<<(index)))
-
+#define GET_BIT64(bb, index) ((bb)&((u64)1<<(index)))
+#define SET_BIT64(bb, index) ((bb)|=((u64)1<<(index)))
+#define RESET_BIT64(bb, index) ((bb)&=~((u64)1<<(index)))
 
 #define RANK_1 C64(0x00000000000000FF)
 #define RANK_2 C64(0x000000000000FF00)
@@ -63,6 +34,33 @@ typedef struct Board{
 #define FILE_F C64(0x2020202020202020)
 #define FILE_G C64(0x4040404040404040)
 #define FILE_H C64(0x8080808080808080)
+
+//a black peice is a white peice +6
+typedef enum Piece{
+	P_EMPTY = -1, //for squarewise board only
+	P_PAWN,
+	P_KNIGHT,
+	P_BISHOP,
+	P_ROOK,
+	P_QUEEN,
+	P_KING
+}Piece;
+
+typedef struct Board{
+	int squares[64];
+	u64 bitboards[12];
+	bool canCastle[4];//white queenside, white kingside, black queenside, black kingside
+	bool whitesTurn;
+	int enPassant; //target square for en passant, ignore if -1
+	
+	//stuff for move generation
+	int color;//0 when turn = white, 6 when turn = black
+	int enemyColor;
+	u64 friendlyPieces;
+	u64 enemyPieces;
+	u64 occupancy;
+
+}Board;
 
 void loadFEN(Board *board, char* fen);
 

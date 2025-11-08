@@ -17,7 +17,7 @@ static bool isSquare(char* str){
 }
 
 static int squareToIndex(char* str){
-	return boardIndex(str[0]-'a',str[1]-'1');
+	return BOARD_INDEX(str[0]-'a',str[1]-'1');
 }
 
 static bool isMove(char* str){
@@ -85,7 +85,7 @@ void cli(){
 
 		if(strcmp(&input[start], "threat") == 0){
 			for(int i = 0; i<64; i++){
-				if(squareThreatenedBy(&board, i, board.enemyColor)) BBSet(highlighted, i);
+				if(squareThreatenedBy(&board, i, board.enemyColor)) SET_BIT64(highlighted, i);
 			}
 			continue;
 		}
@@ -123,8 +123,8 @@ void cli(){
 			}
 			printMove(move);
 			makeMove(&board, move);
-			BBSet(highlighted, move.to);
-			BBSet(highlighted, move.from);
+			SET_BIT64(highlighted, move.to);
+			SET_BIT64(highlighted, move.from);
 			continue;
 		}
 		
@@ -132,7 +132,7 @@ void cli(){
 			int from = squareToIndex(&input[start]);
 			for(int i = 0; i<legalMoves.length; i++){
 				if(legalMoves.moves[i].from == from){
-					BBSet(highlighted, legalMoves.moves[i].to);
+					SET_BIT64(highlighted, legalMoves.moves[i].to);
 					printMove(legalMoves.moves[i]);
 				}
 			}
