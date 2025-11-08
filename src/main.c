@@ -28,7 +28,6 @@ void cli(){
 	while(!quit){
 		legalMoves.length = 0;//clear array
 		generateMoves(&board, &legalMoves);
-		printf("%d moves\n", legalMoves.length);
 		
 		//print board
 		if(board.whitesTurn) printf(" ---white goes---\n");//"whites turn" and "white to go" are not centered

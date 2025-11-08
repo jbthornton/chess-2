@@ -224,7 +224,7 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 	//  the relevant rook has been captured
 	//the kings safety, the safety of the squares bewteen the king and the rook, and the emptyness of those squares must be checked here
 	int kingSquare = (board->whitesTurn)? 4 : 60;
-	if(board->canCastle[ (board->whitesTurn)? 0 : 2 ]){//check queenside castling rights
+	if(board->canCastle[ (board->whitesTurn)? 1 : 3 ]){//check queenside castling rights
 		int rookSquare = (board->whitesTurn)? 0 : 56;
 		bool canCastle = true;
 		for(int s = kingSquare; s>rookSquare; s--){
