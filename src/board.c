@@ -7,7 +7,7 @@
 #include "error.h"
 #include "print.h"
 
-static int charToPiece(char c){
+int charToPiece(char c){
 	int piece = 0;
 	switch(tolower(c)){
 		case 'p':
@@ -36,6 +36,21 @@ static int charToPiece(char c){
 	return piece;
 }
 
+bool isSquare(char* str){
+	if(str[0]<'a' || str[0]>'h') return false;
+	if(str[1]<'1' || str[1]>'8') return false;
+	return true;
+}
+
+int squareToIndex(char* str){
+	return BOARD_INDEX(str[0]-'a',str[1]-'1');
+}
+
+bool isMove(char* str){
+	if(isSquare(str) && isSquare(&str[2])) return true;
+	return false;
+}
+
 void loadFEN(Board *board, char* fen){
 	int len = strlen(fen);
 	int index = 0;
@@ -46,6 +61,7 @@ void loadFEN(Board *board, char* fen){
 	for(int i = 0; i<4; i++) board->canCastle[0] = false;
 	board->halfmoveClock = 0;
 	board->fullmoveClock = 0;
+	board->enPassant = -1;
 	
 	for(int y = 7; y>=0; y--){
 		int x = 0;
@@ -67,12 +83,14 @@ void loadFEN(Board *board, char* fen){
 	}
 	if(index>=(len-1)) error("loadFEN() fen is cut short or invalid");
 
+	//turn
 	if(fen[index] == 'w') board->whitesTurn = true;
 	else board->whitesTurn = false;
 	index++;
 	
 	index++;//skip ' '
 	
+	//castling rights	
 	if(index>=(len-1)) error("loadFEN() fen is cut short or invalid");
 	if(fen[index] == '-'){
 		index++;
@@ -86,9 +104,19 @@ void loadFEN(Board *board, char* fen){
 		}
 	}
 	index++;//skip ' '
-	
-	updatePerspectiveVariables(board);
 
+	//en passan square
+	if(fen[index] == '-'){
+		index++;
+	}else{
+		board->enPassant = squareToIndex(&fen[index]);
+		index+=2;
+	}
+	index++;//skip ' '
+
+	updatePerspectiveVariables(board);
+	
+	//half/full move counters
 	if(index>=(len-1)) return; //accept strings that dont include half/full move counters
 	board->halfmoveClock = atoi(&fen[index]);
 	while(fen[index] != ' ') if(index++>=(len-1)) return;
@@ -125,6 +153,14 @@ void makeFen(Board *board, char* fen){
 	if(board->canCastle[2]) fen[index++] = 'k';
 	if(board->canCastle[3]) fen[index++] = 'q';
 	if(fen[index-1] == ' ') fen[index++] = '-';
+
+	fen[index++] = ' ';
+	if(board->enPassant == -1){
+		fen[index++] = '-';
+	}else{
+		fen[index++] = 'a'+(board->enPassant%8);
+		fen[index++] = '1'+(board->enPassant/8);
+	}
 
 	sprintf(&fen[index], " %d %d", board->halfmoveClock, board->fullmoveClock);
 }

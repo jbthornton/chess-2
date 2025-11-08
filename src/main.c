@@ -11,21 +11,6 @@
 
 #include "magic.h"
 
-static bool isSquare(char* str){
-	if(str[0]<'a' || str[0]>'h') return false;
-	if(str[1]<'1' || str[1]>'8') return false;
-	return true;
-}
-
-static int squareToIndex(char* str){
-	return BOARD_INDEX(str[0]-'a',str[1]-'1');
-}
-
-static bool isMove(char* str){
-	if(isSquare(str) && isSquare(&str[2])) return true;
-	return false;
-}
-
 static void getInput(const char* prompt, char* input, int size){
 	printf("%s", prompt);
 	fgets(input, size, stdin);
@@ -43,9 +28,10 @@ void cli(){
 	while(!quit){
 		legalMoves.length = 0;//clear array
 		generateMoves(&board, &legalMoves);
+		printf("%d moves\n", legalMoves.length);
 		
 		//print board
-		if(board.whitesTurn) printf(" ---white goes---\n");//"blacks turn" and "black to go" are not centered
+		if(board.whitesTurn) printf(" ---white goes---\n");//"whites turn" and "white to go" are not centered
 		else                 printf(" ---black goes---\n");
 		printBoard(&board, highlighted);
 		highlighted = (u64)0;
@@ -117,7 +103,7 @@ void cli(){
 				STARTPOS_FEN,
 				STARTPOS_FEN,
 				STARTPOS_FEN,
-				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - "
+				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"
 			};
 			int results[] = {
 				8902,

@@ -36,7 +36,7 @@ typedef uint64_t u64;
 #define FILE_H C64(0x8080808080808080)
 
 #define MAX_FEN_SIZE 100 //assumes fullmove counter < 10^14
-#define STARTPOS_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq 0 0"
+#define STARTPOS_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
 
 //a black peice is a white peice +6
 typedef enum Piece{
@@ -75,3 +75,8 @@ int bitScanForward(u64 x);
 u64 BBSignedShift(u64 x, int s);
 int countBits(u64 x);
 void updatePerspectiveVariables(Board *board);
+
+int charToPiece(char c);
+bool isSquare(char* str);
+int squareToIndex(char* str);
+bool isMove(char* str);
