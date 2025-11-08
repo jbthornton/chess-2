@@ -1,7 +1,7 @@
 CC:=clang
 CARGS:=
 BINNAME=main
-SRC:= $(wildcard ./*.c)
+SRC:= $(wildcard src/*.c)
 
 OBJ:=$(SRC:.c=.o)
 DEPS:=$(SRC:.c=.d)
