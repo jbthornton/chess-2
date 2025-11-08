@@ -1,4 +1,5 @@
 #include "movegen.h"
+#include "print.h"
 #include "magic.h"
 
 static u64 knightDestinations[64];
@@ -143,7 +144,15 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 	addPawnMoves(promoRank, destinations, shift, ma);
 	
 	//double forward
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~board->occupancy);
+	u64 blockers = board->occupancy;
+	if(board->whitesTurn){
+		u64 rank3 = board->occupancy&RANK_3;
+		blockers |= rank3<<8;
+	}else{
+		u64 rank6 = board->occupancy&RANK_6;
+		blockers |= rank6>>8;
+	}
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~blockers);
 	addPawnMoves(promoRank, destinations, shift*2, ma);
 	
 	u64 targets = board->enemyPieces;

@@ -104,7 +104,9 @@ void cli(){
 		if(strcmp(&input[start], "perft") == 0){
 			getInput(" depth:", input, 100);
 			int depth = atoi(input);
-			perft(STARTPOS_FEN, depth, 0);
+			char fen[MAX_FEN_SIZE];
+			makeFen(&board, fen);
+			perft(fen, depth, 0);
 			continue;
 		}
 
