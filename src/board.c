@@ -6,61 +6,85 @@
 #include "error.h"
 #include "print.h"
 
+static int charToPiece(char c){
+	int piece = 0;
+	switch(tolower(c)){
+		case 'p':
+			piece = P_PAWN;
+			break;
+		case 'n':
+			piece = P_KNIGHT;
+			break;
+		case 'b':
+			piece = P_BISHOP;
+			break;
+		case 'r':
+			piece = P_ROOK;
+			break;
+		case 'k':
+			piece = P_KING;
+			break;
+		case 'q':
+			piece = P_QUEEN;
+			break;
+		default:
+			error("charToPiece(), received invalid char");
+	}
+	if(islower(c))
+		piece += 6;
+	return piece;
+}
+
 void loadFEN(Board *board, char* fen){
+	int len = strlen(fen);
 	int index = 0;
-	int x = 0;
-	int y = 7;
 	for(int i = 0; i<12; i++){
 		board->bitboards[i] = (u64)0;
 	}
-	while(index<strlen(fen)){
-		if(isdigit(fen[index])){
-			for(int i = 0; i<fen[index]-'0'; i++){
-				board->squares[BOARD_INDEX(x,y)] = P_EMPTY;
+	for(int i = 0; i<64; i++) board->squares[i] = P_EMPTY;
+	for(int i = 0; i<4; i++) board->canCastle[0] = false;
+	board->halfmoveClock = 0;
+	board->fullmoveClock = 0;
+	
+	for(int y = 7; y>=0; y--){
+		int x = 0;
+		while(x<8){
+			if(isalpha(fen[index])){
+				int piece = charToPiece(fen[index]);
+				board->squares[BOARD_INDEX(x,y)] = piece;
+				SET_BIT64(board->bitboards[piece], BOARD_INDEX(x,y));
 				x++;
+				index++;
 			}
-			index++;
+			if(isdigit(fen[index])){
+				x += fen[index] - '0';
+				index++;
+			}
 		}
-		if(fen[index] == '/'){
-			y--;
-			x = 0;
-			index++;
-		};
-		if(isalpha(fen[index])){
-			int piece = 0;
-			switch(tolower(fen[index])){
-				case 'p':
-					piece = P_PAWN;
-					break;
-				case 'n':
-					piece = P_KNIGHT;
-					break;
-				case 'b':
-					piece = P_BISHOP;
-					break;
-				case 'r':
-					piece = P_ROOK;
-					break;
-				case 'k':
-					piece = P_KING;
-					break;
-				case 'q':
-					piece = P_QUEEN;
-					break;
-			}
-			if(islower(fen[index]))
-				piece += 6;
-			SET_BIT64(board->bitboards[piece], BOARD_INDEX(x, y));
-			board->squares[BOARD_INDEX(x,y)] = piece;
-			x++;
+		if(fen[index] != '/' && y!=0) error("loadFEN() missing '/'");
+		index++;
+	}
+	if(index>=(len-1)) error("loadFEN() fen is cut short or invalid");
+
+	if(fen[index] == 'w') board->whitesTurn = true;
+	else board->whitesTurn = false;
+	index++;
+
+	index++;//skip ' '
+	
+	if(index>=(len-1)) error("loadFEN() fen is cut short or invalid");
+	if(fen[index] == '-'){
+		index++;
+	}else{
+		while(fen[index] != ' '){
+			if(fen[index] == 'K') board->canCastle[0] = true;
+			if(fen[index] == 'Q') board->canCastle[1] = true;
+			if(fen[index] == 'k') board->canCastle[2] = true;
+			if(fen[index] == 'q') board->canCastle[3] = true;
 			index++;
 		}
 	}
-	for(int i = 0; i<4; i++)
-		board->canCastle[i] = true;
-	board->enPassant = -1;	
-	board->whitesTurn = true;
-	updatePerspectiveVariables(board);
+	if(index>=(len-1)) return; //accept strings that dont include half/full move counters
 }
 
 void makeFen(Board *board, char* fen){
@@ -90,7 +114,7 @@ void makeFen(Board *board, char* fen){
 	if(board->canCastle[3]) fen[index++] = 'q';
 	if(fen[index-1] == ' ') fen[index++] = '-';
 
-	sprintf(&fen[index], " %d %d", board->halfmoveCounter, board->fullmoveCounter);
+	sprintf(&fen[index], " %d %d", board->halfmoveClock, board->fullmoveClock);
 }
 
 static const int index64[64] = {

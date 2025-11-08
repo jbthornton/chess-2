@@ -26,9 +26,9 @@ static bool isMove(char* str){
 	return false;
 }
 
-static void getInput(const char* prompt, char* input){
+static void getInput(const char* prompt, char* input, int size){
 	printf("%s", prompt);
-	fgets(input, sizeof(input), stdin);
+	fgets(input, size, stdin);
 }
 
 void cli(){
@@ -50,7 +50,7 @@ void cli(){
 		printBoard(&board, highlighted);
 		highlighted = (u64)0;
 
-		getInput(" :", input);
+		getInput(" :", input, 100);
 
 		//remove whitespace characters from input	
 		int start = -1;
@@ -75,6 +75,7 @@ void cli(){
 					" threat - highlight threatened squares\n"
 					" index - print board indices\n"
 					" fen - print board fen\n"
+					" load - load board from fen\n"
 					" <square><square><promotion> - make a move (eg b1c3)\n"
 					" <square> - show legal moves from a square (eg b1)\n"
 					" press enter to continue\n"
@@ -101,7 +102,7 @@ void cli(){
 		}
 
 		if(strcmp(&input[start], "perft") == 0){
-			getInput(" depth:", input);
+			getInput(" depth:", input, 100);
 			int depth = atoi(input);
 			perft(STARTPOS_FEN, depth, 0);
 			continue;
@@ -111,6 +112,14 @@ void cli(){
 			char fen[MAX_FEN_SIZE];
 			makeFen(&board, fen);
 			printf("%s\n", fen);
+			continue;
+		}
+
+		if(strcmp(&input[start], "load") == 0){
+			char fen[MAX_FEN_SIZE];
+			getInput(" fen:", fen, MAX_FEN_SIZE);
+			printf("%s\n", fen);
+			loadFEN(&board, fen);
 			continue;
 		}
 
