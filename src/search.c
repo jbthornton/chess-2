@@ -6,7 +6,6 @@
 static int perftSearch(Board board, Move move, int depth);
 
 void perft(char* fen, int depth, int expected, bool divided){
-	printf("%s\n", fen);
 	Board board;
 	loadFEN(&board, fen);
 	int result = 0;

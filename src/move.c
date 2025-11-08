@@ -81,16 +81,16 @@ void makeMove(Board* board, Move move){
 
 	if(pieceType == P_ROOK){
 		switch(move.from){
-			case 0: //a1
-				board->canCastle[0] = false; //white kingside
-				break;
 			case 7: //h1
-				board->canCastle[1] = false; //white queenside 
+				board->canCastle[0] = false; //white kingside 
 				break;
-			case 56: //a8
-				board->canCastle[2] = false; //black kingside
+			case 0: //a1
+				board->canCastle[1] = false; //white queenside
 				break;
 			case 63: //h8
+				board->canCastle[2] = false; //black kingside 
+				break;
+			case 56: //a8
 				board->canCastle[3] = false; //black queenside 
 				break;
 		}
@@ -98,16 +98,16 @@ void makeMove(Board* board, Move move){
 
 	if(capturedType == P_ROOK){
 		switch(move.to){
-			case 0: //a1
-				board->canCastle[0] = false; //white kingside
-				break;
 			case 7: //h1
-				board->canCastle[1] = false; //white queenside 
+				board->canCastle[0] = false; //white kingside 
 				break;
-			case 56: //a8
-				board->canCastle[2] = false; //black kingside
+			case 0: //a1
+				board->canCastle[1] = false; //white queenside
 				break;
 			case 63: //h8
+				board->canCastle[2] = false; //black kingside 
+				break;
+			case 56: //a8
 				board->canCastle[3] = false; //black queenside 
 				break;
 		}
