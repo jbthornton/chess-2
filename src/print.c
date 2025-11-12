@@ -88,10 +88,8 @@ void printBoardDebug(Board *board){
 }
 
 void printMove(Board* board, Move m){
-	if(board->squares[m.from] == P_PAWN && m.promotion != P_EMPTY){
-		printf("%c%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8), pieceToChar(m.promotion));
-	}
-	else{
+	if(moveIsPromo(m))
+		printf("%c%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8), pieceToChar(m.type));
+	else
 		printf("%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8));
-	}
 }

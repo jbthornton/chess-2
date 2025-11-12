@@ -98,26 +98,28 @@ void cli(){
 		}
 
 		if(strcmp(&input[start], "test") == 0){
-			char positions[][MAX_FEN_SIZE] = {
+			char positions[7][MAX_FEN_SIZE] = {
 				STARTPOS_FEN,
 				STARTPOS_FEN,
 				STARTPOS_FEN,
 				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0",
 				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0",
 				"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+				"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1 ",
 			};
-			int results[] = {
+			int results[7] = {
 				8902,
 				197281,
 				4865609,
 			 	4085603,
 				193690690,
 				62379,
+				11030083
+			};//a5a6 d6d5 a6b7 d5d4 b7c8
+			int depths[7] = {
+				3,4,5,4,5,3,6
 			};
-			int depths[] = {
-				3,4,5,4,5,3
-			};
-			for(int i = 0; i<6; i++){
+			for(int i = 0; i<7; i++){
 				printf("%d) ", i);
 				perft(positions[i], depths[i], results[i], false);
 			}
@@ -143,21 +145,22 @@ void cli(){
 			Move move;
 			move.from = squareToIndex(&input[start]);
 			move.to = squareToIndex(&input[start+2]);
+			move.type = M_NORMAL;
 			switch(tolower(input[start+4])){
 				case 'n':
-					move.promotion = P_KNIGHT;
+					move.type = P_KNIGHT;
 					break;
 				case 'r':
-					move.promotion = P_ROOK;
+					move.type = P_ROOK;
 					break;
 				case 'b':
-					move.promotion = P_BISHOP;
+					move.type = P_BISHOP;
 					break;
 				case 'q':
-					move.promotion = P_QUEEN;
+					move.type = P_QUEEN;
 					break;
 				default:
-					move.promotion = P_EMPTY;
+					move.type = P_EMPTY;
 					break;
 			}
 			printMove(&board, move);

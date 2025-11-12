@@ -100,7 +100,7 @@ static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
 	while(destinations){
 		int square = bitScanForward(destinations);
 		destinations &= destinations-1;//reset ls1b
-		Move m = (Move){.to = square, .from = from};
+		Move m = (Move){.to = square, .from = from, .type = M_NORMAL};
 		moveArrayAppend(ma, m);
 	}
 }
@@ -114,7 +114,7 @@ static void addPawnMoves(u64 promoRank, u64 destinations, int shift, MoveArray* 
 	while(noPromotions){
 		int square = bitScanForward(noPromotions);
 		noPromotions &= noPromotions-1;//reset ls1b
-		Move m = (Move){.to = square, .from = square-shift, .promotion = P_EMPTY};
+		Move m = (Move){.to = square, .from = square-shift, .type = M_NORMAL};
 		moveArrayAppend(ma, m);
 	}
 	
@@ -122,11 +122,11 @@ static void addPawnMoves(u64 promoRank, u64 destinations, int shift, MoveArray* 
 	while(promotions){
 		int square = bitScanForward(promotions);
 		promotions &= promotions-1;//reset ls1b
-		//use this const array to avoid depending on the numerical values of the PIECES enum
-		const int promotionPieces[] = {P_QUEEN, P_KNIGHT, P_ROOK, P_BISHOP};
+
+		const int promotions[] = {M_PROMO_QUEEN, M_PROMO_KNIGHT, M_PROMO_ROOK, M_PROMO_BISHOP};
 		for(int i = 0; i<4; i++){
 			//.promotion is a peice type, dont add color
-			Move m = (Move){.to = square, .from = square-shift, .promotion = promotionPieces[i]};
+			Move m = (Move){.to = square, .from = square-shift, .type = promotions[i]};
 			moveArrayAppend(ma, m);
 		}
 	}
@@ -243,6 +243,7 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 				Move move;
 				move.from = kingSquare;
 				move.to = kingSquare-2;
+				move.type = M_CASTLE;
 				moveArrayAppend(ma, move);
 		}
 	}
@@ -267,6 +268,7 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 				Move move;
 				move.from = kingSquare;
 				move.to = kingSquare+2;
+				move.type = M_CASTLE;
 				moveArrayAppend(ma, move);
 		}
 	}

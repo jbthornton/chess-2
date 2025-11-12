@@ -19,6 +19,10 @@ static void movePiece(Board* board, int from, int to){
 		RESET_BIT64(board->bitboards[captured], to);
 }
 
+bool moveIsPromo(Move move){
+	return (move.type != M_NORMAL && move.type != M_CASTLE);
+}
+
 void makeMove(Board* board, Move move){
 	int piece = board->squares[move.from];
 	int captured = board->squares[move.to];
@@ -27,14 +31,15 @@ void makeMove(Board* board, Move move){
 	movePiece(board, move.from, move.to);
 	
 	//Promotion
-	if(pieceType == P_PAWN && move.promotion != P_EMPTY){
-		board->squares[move.to] = move.promotion+board->color;
+	if(moveIsPromo(move)){
+		int promotion = move.type;//M_PROMO_QUEEN == P_QUEEN ect
+		board->squares[move.to] = promotion+board->color;
 		RESET_BIT64(board->bitboards[piece], move.to);
-		SET_BIT64(board->bitboards[move.promotion+board->color], move.to);
+		SET_BIT64(board->bitboards[promotion+board->color], move.to);
 	}
 	
 	//Castling
-	if(pieceType == P_KING && abs(move.to-move.from)>1){
+	if(move.type == M_CASTLE){
 		//move the rook
 		if(move.to == 62)//g8
 			movePiece(board, 63, 61);//h8->f8
