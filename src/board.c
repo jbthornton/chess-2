@@ -58,7 +58,7 @@ void loadFEN(Board *board, char* fen){
 		board->bitboards[i] = (u64)0;
 	}
 	for(int i = 0; i<64; i++) board->squares[i] = P_EMPTY;
-	for(int i = 0; i<4; i++) board->canCastle[i] = false;
+	board->castlingRights = 0;
 	board->halfmoveClock = 0;
 	board->fullmoveClock = 0;
 	board->enPassant = -1;
@@ -97,10 +97,10 @@ void loadFEN(Board *board, char* fen){
 	}else{
 		for(int i = 0; i<4; i++){
 			if(fen[index] == ' ') break;
-			if(fen[index] == 'K') board->canCastle[0] = true;
-			if(fen[index] == 'Q') board->canCastle[1] = true;
-			if(fen[index] == 'k') board->canCastle[2] = true;
-			if(fen[index] == 'q') board->canCastle[3] = true;
+			if(fen[index] == 'K') board->castlingRights |= CR_WHITE_KINGSIDE;
+			if(fen[index] == 'Q') board->castlingRights |= CR_WHITE_QUEENSIDE;
+			if(fen[index] == 'k') board->castlingRights |= CR_BLACK_KINGSIDE;
+			if(fen[index] == 'q') board->castlingRights |= CR_BLACK_QUEENSIDE;
 			index++;
 		}
 	}
@@ -149,10 +149,10 @@ void makeFen(Board *board, char* fen){
 	fen[index++] = (board->whitesTurn)? 'w':'b';
 
 	fen[index++] = ' ';
-	if(board->canCastle[0]) fen[index++] = 'K';
-	if(board->canCastle[1]) fen[index++] = 'Q';
-	if(board->canCastle[2]) fen[index++] = 'k';
-	if(board->canCastle[3]) fen[index++] = 'q';
+	if(board->castlingRights&CR_WHITE_KINGSIDE) fen[index++]  = 'K';
+	if(board->castlingRights&CR_WHITE_QUEENSIDE) fen[index++] = 'Q';
+	if(board->castlingRights&CR_BLACK_KINGSIDE) fen[index++]  = 'k';
+	if(board->castlingRights&CR_BLACK_QUEENSIDE) fen[index++] = 'q';
 	if(fen[index-1] == ' ') fen[index++] = '-';
 
 	fen[index++] = ' ';

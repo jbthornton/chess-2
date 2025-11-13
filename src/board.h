@@ -50,10 +50,16 @@ typedef enum Piece{
 	P_KING
 }Piece;
 
+//Castling Rights
+#define CR_WHITE_QUEENSIDE 0b00000001
+#define CR_WHITE_KINGSIDE  0b00000010
+#define CR_BLACK_QUEENSIDE 0b00000100
+#define CR_BLACK_KINGSIDE  0b00001000
+
 typedef struct Board{
 	int squares[64];
 	u64 bitboards[12];
-	bool canCastle[4];//white queenside, white kingside, black queenside, black kingside
+	char castlingRights;
 	bool whitesTurn;
 	int enPassant; //target square for en passant, ignore if -1
 	int halfmoveClock;
@@ -65,7 +71,6 @@ typedef struct Board{
 	u64 friendlyPieces;
 	u64 enemyPieces;
 	u64 occupancy;
-
 }Board;
 
 void loadFEN(Board *board, char* fen);

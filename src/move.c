@@ -79,24 +79,25 @@ void makeMove(Board* board, Move move){
 
 	//Castling Rights
 	if(pieceType == P_KING){
-		int ks = (board->whitesTurn)? 0 : 2;
-		board->canCastle[ks] = false;//kingside
-		board->canCastle[ks+1] = false;//queenside
+		if(board->whitesTurn)
+			board->castlingRights &= ~(CR_WHITE_KINGSIDE|CR_WHITE_QUEENSIDE);
+		else
+			board->castlingRights &= ~(CR_BLACK_KINGSIDE|CR_BLACK_QUEENSIDE);
 	}
 
 	if(pieceType == P_ROOK){
 		switch(move.from){
 			case 7: //h1
-				board->canCastle[0] = false; //white kingside 
+				board->castlingRights &= ~CR_WHITE_KINGSIDE;
 				break;
 			case 0: //a1
-				board->canCastle[1] = false; //white queenside
+				board->castlingRights &= ~CR_WHITE_QUEENSIDE;
 				break;
 			case 63: //h8
-				board->canCastle[2] = false; //black kingside 
+				board->castlingRights &= ~CR_BLACK_KINGSIDE;
 				break;
 			case 56: //a8
-				board->canCastle[3] = false; //black queenside 
+				board->castlingRights &= ~CR_BLACK_QUEENSIDE;
 				break;
 		}
 	}
@@ -104,16 +105,16 @@ void makeMove(Board* board, Move move){
 	if(capturedType == P_ROOK){
 		switch(move.to){
 			case 7: //h1
-				board->canCastle[0] = false; //white kingside 
+				board->castlingRights &= ~CR_WHITE_KINGSIDE;
 				break;
 			case 0: //a1
-				board->canCastle[1] = false; //white queenside
+				board->castlingRights &= ~CR_WHITE_QUEENSIDE;
 				break;
 			case 63: //h8
-				board->canCastle[2] = false; //black kingside 
+				board->castlingRights &= ~CR_BLACK_KINGSIDE;
 				break;
 			case 56: //a8
-				board->canCastle[3] = false; //black queenside 
+				board->castlingRights &= ~CR_BLACK_QUEENSIDE;
 				break;
 		}
 	}
