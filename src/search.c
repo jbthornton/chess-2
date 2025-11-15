@@ -1,3 +1,4 @@
+#include <time.h>
 #include <stdio.h>
 
 #include "search.h"
@@ -5,11 +6,12 @@
 
 static int perftSearch(Board* board, int depth);
 
-void perft(char* fen, int depth, int expected, bool divided){
+float perft(char* fen, int depth, int expected, bool divided){
 	Board board;
 	loadFEN(&board, fen);
 	int result = 0;
-
+	
+	clock_t beginning = clock();
 	MoveArray legalMoves;
 	legalMoves.length = 0;
 	generateMoves(&board, &legalMoves);
@@ -28,9 +30,12 @@ void perft(char* fen, int depth, int expected, bool divided){
 		unmakeMove(&board, unmove);
 	
 	}
-
-	if(expected != 0) printf("Depth: %d, %d/%d, Error: %d\n", depth, result, expected, result-expected);
-	if(expected == 0) printf("Depth: %d, %d\n", depth, result);
+	clock_t end = clock();
+	clock_t elapsed = end-beginning;
+	float elapsedSeconds = (float)elapsed/CLOCKS_PER_SEC;
+	if(expected != 0) printf("Depth: %d, %d/%d, Error: %d, Time: %fs\n", depth, result, expected, result-expected, elapsedSeconds);
+	if(expected == 0) printf("Depth: %d, %d, Time: %fs\n", depth, result, elapsedSeconds);
+	return elapsedSeconds;
 }
 
 static int perftSearch(Board* board, int depth){

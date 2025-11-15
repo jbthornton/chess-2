@@ -3,4 +3,4 @@
 #include "move.h"
 #include "movegen.h"
 
-void perft(char* fen, int depth, int expected, bool divided);
+float perft(char* fen, int depth, int expected, bool divided);//returns time of search in seconds
