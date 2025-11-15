@@ -66,6 +66,9 @@ void cli(){
 					" perft - perft from current position\n"
 					" test - perft from preset positions\n"
 					" eval - eval of current position\n"
+					" debug - prints bitboards individualy\n"
+					" magic - create a magic number for every square\n"
+					" refine - improve current magic numbers\n"
 					" <square><square><promotion> - make a move (eg b1c3)\n"
 					" <square> - show legal moves from a square (eg b1)\n"
 					" press enter to continue\n"
@@ -165,6 +168,13 @@ void cli(){
 			continue;
 		}
 
+		if(strcmp(&input[start], "refine") == 0){
+			getInput(" iterations:", input, 100);
+			int iter = atoi(input);
+			refineMagics(iter);
+			continue;
+		}
+		
 		if(isMove(&input[start])){
 			Move move;
 			move.from = squareToIndex(&input[start]);
