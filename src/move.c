@@ -174,3 +174,10 @@ void unmakeMove(Board* board, Unmove unmove){
 		SET_BIT64(board->bitboards[P_PAWN+board->color], unmove.from);
 	}
 }
+
+void printMove(Move m){
+	if(moveIsPromo(m))
+		printf("%c%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8), pieceToChar(m.type));
+	else
+		printf("%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8));
+}

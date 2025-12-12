@@ -31,3 +31,4 @@ typedef struct Unmove{
 bool moveIsPromo(Move move);
 Unmove makeMove(Board* board, Move move);
 void unmakeMove(Board* board, Unmove unmove);
+void printMove(Move move);

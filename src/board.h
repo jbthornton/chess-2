@@ -82,6 +82,7 @@ int countBits(u64 x);
 void updatePerspectiveVariables(Board *board);
 
 int charToPiece(char c);
+char pieceToChar(int piece);
 bool isSquare(char* str);
 int squareToIndex(char* str);
 bool isMove(char* str);

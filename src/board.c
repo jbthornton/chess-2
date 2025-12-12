@@ -5,7 +5,12 @@
 
 #include "board.h"
 #include "error.h"
-#include "print.h"
+
+char pieceToChar(int piece){
+	if(piece<-1 || piece>P_KING+6) return '?';
+	const char* pieceChars = " PNBRQKpnbrqk";
+	return pieceChars[piece+1];
+}
 
 int charToPiece(char c){
 	int piece = 0;
