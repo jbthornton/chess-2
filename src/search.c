@@ -3,6 +3,7 @@
 
 #include "search.h"
 #include "eval.h"
+#include "uci.h"
 
 static int nmax(Board *board, int depth);
 Move search(Board board, int depth){

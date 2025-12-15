@@ -73,16 +73,10 @@ typedef struct Board{
 	u64 occupancy;
 }Board;
 
-void loadFEN(Board *board, char* fen);
-void makeFen(Board *board, char* fen);
 
 int bitScanForward(u64 x);
 u64 BBSignedShift(u64 x, int s);
 int countBits(u64 x);
 void updatePerspectiveVariables(Board *board);
 
-int charToPiece(char c);
-char pieceToChar(int piece);
-bool isSquare(char* str);
 int squareToIndex(char* str);
-bool isMove(char* str);
