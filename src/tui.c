@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include "board.h"
 #include "move.h"
+#include "search.h"
 #include "uci.h"
 
 #define C_DARK "\x1b[42m"
@@ -102,7 +103,15 @@ static void run_command(char* cmd, TUIState *state){
 	}
 
 	if(is_move(cmd)){
-		makeMove(&state->board, str_to_move(cmd, state->board));
+		Move move = str_to_move(cmd, state->board);
+		makeMove(&state->board, move);
+		printf("\n");
+		print_board(state->board, ((u64)1 << move.from) | ((u64)1 << move.to));
+
+		printf("thinking...\n");
+		move = search(state->board, 4);
+		makeMove(&state->board, move);
+		state->highlighted = ((u64)1 << move.from) | ((u64)1 << move.to);
 		return;
 	}
 
