@@ -44,14 +44,16 @@ int charToPiece(char c){
 	return piece;
 }
 
-bool strIsSquare(char* str){
+bool issquare(char* str){
+	if(strlen(str)<2) return false;
 	if(str[0]<'a' || str[0]>'h') return false;
 	if(str[1]<'1' || str[1]>'8') return false;
 	return true;
 }
 
-bool strIsMove(char* str){
-	if(strIsSquare(str) && strIsSquare(&str[2])) return true;
+bool ismove(char* str){
+	if(strlen(str)<4) return false;
+	if(issquare(str) && issquare(&str[2])) return true;
 	return false;
 }
 
