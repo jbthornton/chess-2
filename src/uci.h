@@ -11,8 +11,8 @@ bool is_square(char* str);
 bool is_move(char* str);
 
 
-void load_FEN(Board *board, char* fen);
+void load_fen(Board *board, char* fen);
 
 void print_square(int index);
 void print_move(Move move);
-void print_FEN(Board board);
+void print_fen(Board board);

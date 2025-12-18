@@ -21,8 +21,9 @@
 	"    help - show list of commands\n"\
 	"    <square> - highlight legal moves\n"\
 	"    <square><square> - make a move\n"\
-	"    fen - print the current position\n"\
-	"replace <square> with the name of any square (eg:\"a1\")\n"\
+	"    fen - print the current position in fen notation\n"\
+	"    load <fen> - load a position from fen notation\n"\
+	"replace <square> with the name of any square (eg:\"a1\")\n"
 
 #define INPUT_BUFFER_SIZE 500
 
@@ -38,7 +39,7 @@ static void print_board(Board board, u64 h);
 
 void run_TUI(){
 	struct TUIState state;
-	load_FEN(&state.board, STARTPOS_FEN);
+	load_fen(&state.board, STARTPOS_FEN);
 	state.running = true;
 	state.highlighted = 0;
 
@@ -80,8 +81,8 @@ static void print_board(Board board, u64 h){
 
 static void run_command(char* cmd, TUIState *state){
 	MoveArray plegal_moves;
-	for
 	generateMoves(&state->board, &plegal_moves);
+
 	while(isspace(cmd[0]))//ignore whitespace in beginning
 		cmd = &cmd[1];
 	size_t len = strlen(cmd);
@@ -101,7 +102,12 @@ static void run_command(char* cmd, TUIState *state){
 	}
 
 	if(strncmp(cmd, "fen", len) == 0){
-		print_FEN(state->board);
+		print_fen(state->board);
+		return;
+	}
+
+	if(strncmp(cmd, "load", (4<len)? 4 : len) == 0 && len>6){
+		load_fen(&state->board, &cmd[5]);
 		return;
 	}
 

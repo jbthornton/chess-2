@@ -78,7 +78,7 @@ bool is_move(char* str){
 	return false;
 }
 
-void load_FEN(Board *board, char* fen){
+void load_fen(Board *board, char* fen){
 	int len = strlen(fen);
 	int index = 0;
 	for(int i = 0; i<12; i++){
@@ -105,10 +105,10 @@ void load_FEN(Board *board, char* fen){
 				index++;
 			}
 		}
-		if(fen[index] != '/' && y!=0) error("loadFEN() missing '/'");
+		if(fen[index] != '/' && y!=0) error("load_fen() missing '/'");
 		index++;
 	}
-	if(index>=(len-1)) error("loadFEN() fen is cut short or invalid");
+	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
 
 	//turn
 	if(fen[index] == 'w') board->whitesTurn = true;
@@ -118,7 +118,7 @@ void load_FEN(Board *board, char* fen){
 	index++;//skip ' '
 	
 	//castling rights	
-	if(index>=(len-1)) error("loadFEN() fen is cut short or invalid");
+	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
 	if(fen[index] == '-'){
 		index++;
 	}else{
@@ -132,6 +132,7 @@ void load_FEN(Board *board, char* fen){
 		}
 	}
 	index++;//skip ' '
+	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
 
 	//en passan square
 	if(fen[index] == '-'){
@@ -140,6 +141,7 @@ void load_FEN(Board *board, char* fen){
 		board->enPassant = str_to_square(&fen[index]);
 		index+=2;
 	}
+	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
 	index++;//skip ' '
 
 	updatePerspectiveVariables(board);
@@ -166,7 +168,7 @@ void print_move(Move m){
 		printf("%c", piece_to_char(m.type));
 }
 
-void print_FEN(Board board){
+void print_fen(Board board){
 	for(int y = 7; y>=0; y--){
 		int emptyCount = 0;
 		for(int x = 0; x<8; x++){

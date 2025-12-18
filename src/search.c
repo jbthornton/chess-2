@@ -61,7 +61,7 @@ static int nmax(Board *board, int depth){
 static int perftSearch(Board* board, int depth);
 float perft(char* fen, int depth, int expected, bool divided){
 	Board board;
-	load_FEN(&board, fen);
+	load_fen(&board, fen);
 	int result = 0;
 	
 	clock_t beginning = clock();
