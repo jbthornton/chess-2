@@ -50,6 +50,8 @@ typedef enum Piece{
 	P_KING
 }Piece;
 
+#define P_TYPE(piece) ((piece)>=6 ? (piece) - 6 : (piece)) //convert any piece to a white piece
+
 //Castling Rights
 #define CR_WHITE_QUEENSIDE 0b00000001
 #define CR_WHITE_KINGSIDE  0b00000010

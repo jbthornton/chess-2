@@ -20,6 +20,7 @@
 	"    help - show list of commands\n"\
 	"    <square> - highlight a square\n"\
 	"    <square><square> - make a move\n"\
+	"    fen - print the current position\n"\
 	"replace <square> with the name of any square (eg:\"a1\")\n"\
 
 #define INPUT_BUFFER_SIZE 500
@@ -36,7 +37,7 @@ static void print_board(Board board, u64 h);
 
 void run_TUI(){
 	struct TUIState state;
-	loadFEN(&state.board, STARTPOS_FEN);
+	load_FEN(&state.board, STARTPOS_FEN);
 	state.running = true;
 	state.highlighted = 0;
 
@@ -52,6 +53,11 @@ void run_TUI(){
 }
 
 static void print_board(Board board, u64 h){
+	if(board.whitesTurn) 
+		printf("   white's turn\n");
+	else
+		printf("   black's turn\n");
+
 	printf(" a b c d e f g h\n");
 	for(int y = 7; y>=0; y--){
 		printf("%d", y+1); 
@@ -64,7 +70,7 @@ static void print_board(Board board, u64 h){
 			if(GET_BIT64(h,BOARD_INDEX(x,y)))
 				printf(C_HIGHLIGHT);
 
-			printf(C_TEXT"%c "C_CLEAR, pieceToChar(board.squares[BOARD_INDEX(x,y)]));
+			printf(C_TEXT"%c "C_CLEAR, piece_to_char(board.squares[BOARD_INDEX(x,y)]));
 		}	
 		printf("%d\n", y+1); 
 	}
@@ -90,16 +96,18 @@ static void run_command(char* cmd, TUIState *state){
 		return;
 	}
 
-	if(ismove(cmd)){
-		Move m;
-		m.from = strToSquare(cmd);
-		m.to = strToSquare(&cmd[2]);
-		makeMove(&state->board, m);
+	if(strncmp(cmd, "fen", len) == 0){
+		print_FEN(state->board);
 		return;
 	}
 
-	if(issquare(cmd)){
-		state->highlighted = (u64)1<<strToSquare(cmd);
+	if(is_move(cmd)){
+		makeMove(&state->board, str_to_move(cmd, state->board));
+		return;
+	}
+
+	if(is_square(cmd)){
+		state->highlighted = (u64)1<<str_to_square(cmd);
 		return;
 	}
 

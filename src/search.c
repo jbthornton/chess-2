@@ -61,7 +61,7 @@ static int nmax(Board *board, int depth){
 static int perftSearch(Board* board, int depth);
 float perft(char* fen, int depth, int expected, bool divided){
 	Board board;
-	loadFEN(&board, fen);
+	load_FEN(&board, fen);
 	int result = 0;
 	
 	clock_t beginning = clock();
@@ -76,7 +76,7 @@ float perft(char* fen, int depth, int expected, bool divided){
 			int nodeCount = perftSearch(&board, depth-1);
 			result += nodeCount;
 			if(divided){
-				printMove(legalMoves.moves[i]);
+				print_move(legalMoves.moves[i]);
 				printf(": %d\n", nodeCount);
 			}
 		}

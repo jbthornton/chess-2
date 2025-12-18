@@ -5,17 +5,38 @@
 #include <stdlib.h>
 #include "error.h"
 
-char pieceToChar(int piece){
+char piece_to_char(int piece){
 	if(piece<-1 || piece>P_KING+6) return '?';
 	const char* pieceChars = " PNBRQKpnbrqk";
 	return pieceChars[piece+1];
 }
 
-int strToSquare(char* str){
+int str_to_square(char* str){
 	return BOARD_INDEX(str[0]-'a',str[1]-'1');
 }
 
-int charToPiece(char c){
+Move str_to_move(char* str, Board board){
+	Move move;
+	move.from = str_to_square(str);
+	move.to = str_to_square(&str[2]);
+	move.type = M_NORMAL;
+
+	int fromp = P_TYPE(board.squares[move.from]);
+
+	if(fromp == P_PAWN){
+		if(strlen(str)>=4 && strchr("nrbq", str[4]))
+			move.type = char_to_piece(toupper(str[4]));//promotion type
+	}
+
+	if(fromp == P_KING){
+		if(move.to-move.from == -2 || move.to-move.from == 2)
+			move.type = M_CASTLE;
+	}
+
+	return move;
+}
+
+int char_to_piece(char c){
 	int piece = 0;
 	switch(tolower(c)){
 		case 'p':
@@ -37,27 +58,27 @@ int charToPiece(char c){
 			piece = P_QUEEN;
 			break;
 		default:
-			error("charToPiece(), received invalid char");
+			error("char_to_piece(), received invalid char");
 	}
 	if(islower(c))
 		piece += 6;
 	return piece;
 }
 
-bool issquare(char* str){
+bool is_square(char* str){
 	if(strlen(str)<2) return false;
 	if(str[0]<'a' || str[0]>'h') return false;
 	if(str[1]<'1' || str[1]>'8') return false;
 	return true;
 }
 
-bool ismove(char* str){
+bool is_move(char* str){
 	if(strlen(str)<4) return false;
-	if(issquare(str) && issquare(&str[2])) return true;
+	if(is_square(str) && is_square(&str[2])) return true;
 	return false;
 }
 
-void loadFEN(Board *board, char* fen){
+void load_FEN(Board *board, char* fen){
 	int len = strlen(fen);
 	int index = 0;
 	for(int i = 0; i<12; i++){
@@ -73,7 +94,7 @@ void loadFEN(Board *board, char* fen){
 		int x = 0;
 		while(x<8){
 			if(isalpha(fen[index])){
-				int piece = charToPiece(fen[index]);
+				int piece = char_to_piece(fen[index]);
 				board->squares[BOARD_INDEX(x,y)] = piece;
 				SET_BIT64(board->bitboards[piece], BOARD_INDEX(x,y));
 				x++;
@@ -116,7 +137,7 @@ void loadFEN(Board *board, char* fen){
 	if(fen[index] == '-'){
 		index++;
 	}else{
-		board->enPassant = strToSquare(&fen[index]);
+		board->enPassant = str_to_square(&fen[index]);
 		index+=2;
 	}
 	index++;//skip ' '
@@ -134,18 +155,18 @@ void loadFEN(Board *board, char* fen){
 	board->fullmoveClock = atoi(&fen[index]);
 }
 
-void printSquare(int index){
+void print_square(int index){
 	printf("%c%d", 'a' + (index%8), index/8);
 }
 
-void printMove(Move m){
-	printSquare(m.from);
-	printSquare(m.to);
+void print_move(Move m){
+	print_square(m.from);
+	print_square(m.to);
 	if(moveIsPromo(m))
-		printf("%c", pieceToChar(m.type));
+		printf("%c", piece_to_char(m.type));
 }
 
-void printFEN(Board board){
+void print_FEN(Board board){
 	for(int y = 7; y>=0; y--){
 		int emptyCount = 0;
 		for(int x = 0; x<8; x++){
@@ -154,7 +175,7 @@ void printFEN(Board board){
 			if(piece != P_EMPTY){
 				if(emptyCount != 0) printf("%d", emptyCount);
 				emptyCount = 0;
-				printf("%c", pieceToChar(piece));
+				printf("%c", piece_to_char(piece));
 			}
 		}
 		if(emptyCount != 0) printf("%d", emptyCount);
@@ -172,7 +193,7 @@ void printFEN(Board board){
 	if(board.enPassant == -1){
 		printf(" - ");
 	}else{
-		printSquare(board.enPassant);
+		print_square(board.enPassant);
 	}
 
 	printf(" %d %d", board.halfmoveClock, board.fullmoveClock);
