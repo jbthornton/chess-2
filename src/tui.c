@@ -36,6 +36,8 @@ typedef struct TUIState{
 
 static void run_command(char* cmd, TUIState *state);
 static void print_board(Board board, u64 h);
+static void cmd_move(TUIState *state, Move move);
+static void cmd_square(TUIState *state, int square);
 
 void run_TUI(){
 	struct TUIState state;
@@ -80,9 +82,6 @@ static void print_board(Board board, u64 h){
 }
 
 static void run_command(char* cmd, TUIState *state){
-	MoveArray plegal_moves;
-	generateMoves(&state->board, &plegal_moves);
-
 	while(isspace(cmd[0]))//ignore whitespace in beginning
 		cmd = &cmd[1];
 	size_t len = strlen(cmd);
@@ -112,26 +111,34 @@ static void run_command(char* cmd, TUIState *state){
 	}
 
 	if(is_move(cmd)){
-		Move move = str_to_move(cmd, state->board);
-		makeMove(&state->board, move);
-		printf("\n");
-		print_board(state->board, ((u64)1 << move.from) | ((u64)1 << move.to));
-
-		printf("thinking...\n");
-		move = search(state->board, 4);
-		makeMove(&state->board, move);
-		state->highlighted = ((u64)1 << move.from) | ((u64)1 << move.to);
+		cmd_move(state, str_to_move(cmd, state->board));
 		return;
 	}
 
 	if(is_square(cmd)){
-		int square = str_to_square(cmd);
-		for(int m = 0; m<plegal_moves.length; m++){
-			if(plegal_moves.moves[m].from == square)
-				state->highlighted |= (u64)1<<plegal_moves.moves[m].to;
-		}
+		cmd_square(state, str_to_square(cmd));
 		return;
 	}
 
 	printf("invalid command, try \"help\" for help\n");
+}
+
+static void cmd_move(TUIState *state, Move move){
+	makeMove(&state->board, move);
+	printf("\n");
+	print_board(state->board, ((u64)1 << move.from) | ((u64)1 << move.to));
+
+	printf("thinking...\n");
+	move = search(state->board, 4);
+	makeMove(&state->board, move);
+	state->highlighted = ((u64)1 << move.from) | ((u64)1 << move.to);
+}
+
+static void cmd_square(TUIState *state, int square){
+	MoveArray plegal_moves;
+	generateMoves(&state->board, &plegal_moves);
+	for(int m = 0; m<plegal_moves.length; m++){
+		if(plegal_moves.moves[m].from == square)
+			state->highlighted |= (u64)1<<plegal_moves.moves[m].to;
+	}
 }
