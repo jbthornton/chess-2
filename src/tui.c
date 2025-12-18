@@ -19,7 +19,7 @@
 	"valid commands:\n"\
 	"    exit - exit the program\n"\
 	"    help - show list of commands\n"\
-	"    <square> - highlight a square\n"\
+	"    <square> - highlight legal moves\n"\
 	"    <square><square> - make a move\n"\
 	"    fen - print the current position\n"\
 	"replace <square> with the name of any square (eg:\"a1\")\n"\
@@ -79,6 +79,9 @@ static void print_board(Board board, u64 h){
 }
 
 static void run_command(char* cmd, TUIState *state){
+	MoveArray plegal_moves;
+	for
+	generateMoves(&state->board, &plegal_moves);
 	while(isspace(cmd[0]))//ignore whitespace in beginning
 		cmd = &cmd[1];
 	size_t len = strlen(cmd);
@@ -116,7 +119,11 @@ static void run_command(char* cmd, TUIState *state){
 	}
 
 	if(is_square(cmd)){
-		state->highlighted = (u64)1<<str_to_square(cmd);
+		int square = str_to_square(cmd);
+		for(int m = 0; m<plegal_moves.length; m++){
+			if(plegal_moves.moves[m].from == square)
+				state->highlighted |= (u64)1<<plegal_moves.moves[m].to;
+		}
 		return;
 	}
 
