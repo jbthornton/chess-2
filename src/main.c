@@ -12,7 +12,7 @@
 #include "tui.h"
 
 int main(int argc, char* argv[]){
-	fillMoveTables();
+	fill_move_tables();
 	run_TUI();
 	return 0;
 }

@@ -135,7 +135,7 @@ static void cmd_move(TUIState *state, Move move){
 
 static void cmd_square(TUIState *state, int square){
 	MoveArray plegal_moves;
-	generateMoves(&state->board, &plegal_moves);
+	gen_pseudolegal_moves(&state->board, &plegal_moves);
 	for(int m = 0; m<plegal_moves.length; m++){
 		if(plegal_moves.moves[m].from == square)
 			state->highlighted |= (u64)1<<plegal_moves.moves[m].to;

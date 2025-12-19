@@ -12,10 +12,10 @@ typedef struct MoveArray{
 }MoveArray;
 
 
-void moveArrayAppend(MoveArray *ma, Move move);
+void ma_append(MoveArray *ma, Move move);
 
-//has to be run before generateMoves
-void fillMoveTables();
+//has to be run before generateMoves, fills lookup tables
+void fill_move_tables();
 
-void generateMoves(Board* board, MoveArray *ma);
-bool squareThreatenedBy(Board* board, int square, int enemyColor);
+void gen_pseudolegal_moves(Board* board, MoveArray *ma);
+bool is_threatened(Board* board, int square, int enemyColor);
