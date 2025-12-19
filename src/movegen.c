@@ -53,8 +53,9 @@ void fillMoveTables(){
 			}
 		}
 	}
-
-	fillMagicTables();
+	//fill magic lookup tables
+	fill_rook_table();
+	fill_bishop_table();
 }
 
 void moveArrayAppend(MoveArray* ma, Move move){
@@ -71,10 +72,10 @@ bool squareThreatenedBy(Board* board, int square, int enemyColor){
 	if(GET_BIT64(pawnDestinations, square)) return true;
 	
 	if(knightDestinations[square] & board->bitboards[P_KNIGHT+enemyColor]) return true;
-	if(getBishopDestinations(square, board->occupancy) & board->bitboards[P_BISHOP+enemyColor]) return true;
-	if(getRookDestinations(square, board->occupancy) & board->bitboards[P_ROOK+enemyColor]) return true;
-	if(getBishopDestinations(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
-	if(getRookDestinations(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
+	if(magic_bishop_lookup(square, board->occupancy) & board->bitboards[P_BISHOP+enemyColor]) return true;
+	if(magic_rook_lookup(square, board->occupancy) & board->bitboards[P_ROOK+enemyColor]) return true;
+	if(magic_bishop_lookup(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
+	if(magic_rook_lookup(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
 	if(kingDestinations[square] & board->bitboards[P_KING+enemyColor]) return true;
 	return false;
 }
@@ -193,7 +194,7 @@ static void genRookMoves(Board* board, MoveArray* ma){
 	while(friendlyRooks){
 		int square = bitscan_forward(friendlyRooks);
 		friendlyRooks &= friendlyRooks-1;
-		u64 destinations = getRookDestinations(square, board->occupancy);
+		u64 destinations = magic_rook_lookup(square, board->occupancy);
 		destinations &= ~board->friendlyPieces;
 		addMovesToDest(destinations, square, ma);
 	}
@@ -205,7 +206,7 @@ static void genBishopMoves(Board* board, MoveArray* ma){
 	while(friendlyBishops){
 		int square = bitscan_forward(friendlyBishops);
 		friendlyBishops &= friendlyBishops-1;
-		u64 destinations = getBishopDestinations(square, board->occupancy);
+		u64 destinations = magic_bishop_lookup(square, board->occupancy);
 		destinations &= ~board->friendlyPieces;
 		addMovesToDest(destinations, square, ma);
 	}
@@ -216,8 +217,8 @@ static void genQueenMoves(Board* board, MoveArray* ma){
 	while(friendlyQueens){
 		int square = bitscan_forward(friendlyQueens);
 		friendlyQueens &= friendlyQueens-1;
-		u64 destinations = getRookDestinations(square, board->occupancy);
-		destinations |= getBishopDestinations(square, board->occupancy);
+		u64 destinations = magic_rook_lookup(square, board->occupancy);
+		destinations |= magic_bishop_lookup(square, board->occupancy);
 		destinations &= ~board->friendlyPieces;
 		addMovesToDest(destinations, square, ma);
 	}
