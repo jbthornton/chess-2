@@ -84,28 +84,27 @@ static void print_board(Board board, u64 h){
 static void run_command(char* cmd, TUIState *state){
 	while(isspace(cmd[0]))//ignore whitespace in beginning
 		cmd = &cmd[1];
-	size_t len = strlen(cmd);
 
-	while(isspace(cmd[len-1]))//ignore whitespace at end
-		len--;
+	while(isspace(cmd[strlen(cmd)-1]))//ignore whitespace at end
+		cmd[strlen(cmd)-1] = 0;
 
-	if(strncmp(cmd, "exit", len) == 0){
+	if(strcmp(cmd, "exit") == 0){
 		printf("bye\n");
 		state->running = false;
 		return;
 	}
 
-	if(strncmp(cmd, "help", len) == 0){
+	if(strcmp(cmd, "help") == 0){
 		printf(HELP);
 		return;
 	}
 
-	if(strncmp(cmd, "fen", len) == 0){
+	if(strcmp(cmd, "fen") == 0){
 		print_fen(state->board);
 		return;
 	}
 
-	if(strncmp(cmd, "load", (4<len)? 4 : len) == 0 && len>6){
+	if(strncmp(cmd, "load ", 5) == 0 && strlen(cmd)>6){
 		load_fen(&state->board, &cmd[5]);
 		return;
 	}
