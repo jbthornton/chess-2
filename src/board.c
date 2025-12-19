@@ -18,6 +18,7 @@ static const int index64[64] = {
    25, 14, 19,  9, 13,  8,  7,  6
 };
 
+
 /**
  * bitScanForward
  * @author Martin Läuter (1997)
@@ -30,7 +31,7 @@ static const int index64[64] = {
  * @return index (0..63) of least significant one bit
  */
 
-int bitScanForward(u64 bb) {
+int bitscan_forward(u64 bb) {
 	if(bb == 0) error("Bitscan forward requires input not to be 0\n");
 	const u64 debruijn64 = (u64)(0x03f79d71b4cb0a89);
 	/*
@@ -43,12 +44,12 @@ int bitScanForward(u64 bb) {
 }
 
 //positive is left shift, or up the board
-u64 BBSignedShift(u64 x, int s){
+u64 signed_shift(u64 x, int s){
 	if(s>0) return x<<s;
 	return x>>(-s);
 }
 
-int countBits(u64 x){
+int count_bits(u64 x){
 	int count = 0;
 	while(x){
 		count++;
@@ -57,7 +58,7 @@ int countBits(u64 x){
 	return count;
 }
 
-void updatePerspectiveVariables(Board* board){
+void update_perspective_variables(Board* board){
 	board->color = board->whitesTurn? 0 : 6;
 	board->enemyColor = board->whitesTurn? 6 : 0;
 	board->occupancy = 0;

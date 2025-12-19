@@ -144,7 +144,7 @@ void load_fen(Board *board, char* fen){
 	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
 	index++;//skip ' '
 
-	updatePerspectiveVariables(board);
+	update_perspective_variables(board);
 
 	//half/full move counters
 	if(index>=(len-1)) return; //accept strings that dont include half/full move counters

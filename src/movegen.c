@@ -66,8 +66,8 @@ bool squareThreatenedBy(Board* board, int square, int enemyColor){
 	//white pieces shift 9, 7
 	//black shift -9 -7 
 	//opposite shift because we care about the enemy
-	u64 pawnDestinations = BBSignedShift(pawns & ~(FILE_A), (enemyColor == 6)? -9:7);
-	pawnDestinations |= BBSignedShift(pawns & ~(FILE_H), (enemyColor == 6)? -7:9);
+	u64 pawnDestinations = signed_shift(pawns & ~(FILE_A), (enemyColor == 6)? -9:7);
+	pawnDestinations |= signed_shift(pawns & ~(FILE_H), (enemyColor == 6)? -7:9);
 	if(GET_BIT64(pawnDestinations, square)) return true;
 	
 	if(knightDestinations[square] & board->bitboards[P_KNIGHT+enemyColor]) return true;
@@ -100,7 +100,7 @@ void generateMoves(Board* board, MoveArray* ma){
 
 static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
 	while(destinations){
-		int square = bitScanForward(destinations);
+		int square = bitscan_forward(destinations);
 		destinations &= destinations-1;//reset ls1b
 		Move m = (Move){.to = square, .from = from, .type = M_NORMAL};
 		moveArrayAppend(ma, m);
@@ -114,7 +114,7 @@ static void addPawnMoves(u64 promoRank, u64 destinations, int shift, MoveArray* 
 	
 	//normal destinations
 	while(noPromotions){
-		int square = bitScanForward(noPromotions);
+		int square = bitscan_forward(noPromotions);
 		noPromotions &= noPromotions-1;//reset ls1b
 		Move m = (Move){.to = square, .from = square-shift, .type = M_NORMAL};
 		moveArrayAppend(ma, m);
@@ -122,7 +122,7 @@ static void addPawnMoves(u64 promoRank, u64 destinations, int shift, MoveArray* 
 	
 	//promotions
 	while(promotions){
-		int square = bitScanForward(promotions);
+		int square = bitscan_forward(promotions);
 		promotions &= promotions-1;//reset ls1b
 
 		const int promotions[] = {M_PROMO_QUEEN, M_PROMO_KNIGHT, M_PROMO_ROOK, M_PROMO_BISHOP};
@@ -140,7 +140,7 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 	u64 promoRank = (board->whitesTurn)? RANK_8 : RANK_1;
 
 	//forward
-	u64 destinations = BBSignedShift(board->bitboards[P_PAWN+board->color], shift)&(~board->occupancy);
+	u64 destinations = signed_shift(board->bitboards[P_PAWN+board->color], shift)&(~board->occupancy);
 	addPawnMoves(promoRank, destinations, shift, ma);
 	
 	//double forward
@@ -152,7 +152,7 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 		u64 rank6 = board->occupancy&RANK_6;
 		blockers |= rank6>>8;
 	}
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~blockers);
+	destinations = signed_shift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~blockers);
 	addPawnMoves(promoRank, destinations, shift*2, ma);
 	
 	u64 targets = board->enemyPieces;
@@ -160,10 +160,10 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 
 
 	//captures 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~FILE_H), shift+1)&targets;
+	destinations = signed_shift(board->bitboards[P_PAWN+board->color]&(~FILE_H), shift+1)&targets;
 	addPawnMoves(promoRank, destinations, shift+1, ma);
 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~FILE_A), shift-1)&targets;
+	destinations = signed_shift(board->bitboards[P_PAWN+board->color]&(~FILE_A), shift-1)&targets;
 	addPawnMoves(promoRank, destinations, shift-1, ma);
 }
 
@@ -171,7 +171,7 @@ static void genKnightMoves(Board* board, MoveArray* ma){
 	u64 friendlyKnights = board->bitboards[P_KNIGHT+board->color];
 	
 	while(friendlyKnights){
-		int i = bitScanForward(friendlyKnights);
+		int i = bitscan_forward(friendlyKnights);
 		friendlyKnights &= friendlyKnights-1;
 		u64 destinations = knightDestinations[i] & ~board->friendlyPieces;
 		addMovesToDest(destinations, i, ma);
@@ -182,7 +182,7 @@ static void genKingMoves(Board* board, MoveArray* ma){
 	if(board->bitboards[P_KING+board->color] == 0) {
 		error("NO KING AAAAH!!!\n");
 	}
-	int i = bitScanForward(board->bitboards[P_KING+board->color]);
+	int i = bitscan_forward(board->bitboards[P_KING+board->color]);
 	u64 destinations = kingDestinations[i] & ~board->friendlyPieces;
 	addMovesToDest(destinations, i, ma);
 }
@@ -191,7 +191,7 @@ static void genRookMoves(Board* board, MoveArray* ma){
 	u64 friendlyRooks = board->bitboards[P_ROOK+board->color];
 
 	while(friendlyRooks){
-		int square = bitScanForward(friendlyRooks);
+		int square = bitscan_forward(friendlyRooks);
 		friendlyRooks &= friendlyRooks-1;
 		u64 destinations = getRookDestinations(square, board->occupancy);
 		destinations &= ~board->friendlyPieces;
@@ -203,7 +203,7 @@ static void genBishopMoves(Board* board, MoveArray* ma){
 	u64 friendlyBishops = board->bitboards[P_BISHOP+board->color];
 
 	while(friendlyBishops){
-		int square = bitScanForward(friendlyBishops);
+		int square = bitscan_forward(friendlyBishops);
 		friendlyBishops &= friendlyBishops-1;
 		u64 destinations = getBishopDestinations(square, board->occupancy);
 		destinations &= ~board->friendlyPieces;
@@ -214,7 +214,7 @@ static void genBishopMoves(Board* board, MoveArray* ma){
 static void genQueenMoves(Board* board, MoveArray* ma){
 	u64 friendlyQueens = board->bitboards[P_QUEEN+board->color];
 	while(friendlyQueens){
-		int square = bitScanForward(friendlyQueens);
+		int square = bitscan_forward(friendlyQueens);
 		friendlyQueens &= friendlyQueens-1;
 		u64 destinations = getRookDestinations(square, board->occupancy);
 		destinations |= getBishopDestinations(square, board->occupancy);

@@ -76,9 +76,8 @@ typedef struct Board{
 }Board;
 
 
-int bitScanForward(u64 x);
-u64 BBSignedShift(u64 x, int s);
-int countBits(u64 x);
-void updatePerspectiveVariables(Board *board);
+int bitscan_forward(u64 x);
+u64 signed_shift(u64 x, int s);
+int count_bits(u64 x);
 
-int squareToIndex(char* str);
+void update_perspective_variables(Board *board);

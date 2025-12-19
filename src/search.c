@@ -14,7 +14,7 @@ Move search(Board board, int depth){
 	generateMoves(&board, &legalMoves);
 	for(int i = 0; i<legalMoves.length; i++){
 		Unmove unmove = makeMove(&board, legalMoves.moves[i]);
-		int kingSquare = bitScanForward(board.bitboards[P_KING+board.enemyColor]);//colors swapped after makeMove
+		int kingSquare = bitscan_forward(board.bitboards[P_KING+board.enemyColor]);//colors swapped after makeMove
 		if(squareThreatenedBy(&board, kingSquare, board.color)){
 			unmakeMove(&board, unmove);
 			continue;
@@ -39,7 +39,7 @@ static int nmax(Board *board, int depth){
 	generateMoves(board, &legalMoves);
 	for(int i = 0; i<legalMoves.length; i++){
 		Unmove unmove = makeMove(board, legalMoves.moves[i]);
-		int kingSquare = bitScanForward(board->bitboards[P_KING+board->enemyColor]);//colors swapped after makeMove
+		int kingSquare = bitscan_forward(board->bitboards[P_KING+board->enemyColor]);//colors swapped after makeMove
 		if(squareThreatenedBy(board, kingSquare, board->color)){
 			unmakeMove(board, unmove);
 			continue;
@@ -71,7 +71,7 @@ float perft(char* fen, int depth, int expected, bool divided){
 
 	for(int i = 0; i<legalMoves.length; i++){
 		Unmove unmove = makeMove(&board, legalMoves.moves[i]);
-		int kingSquare = bitScanForward(board.bitboards[P_KING+board.enemyColor]);//colors swapped after makeMove
+		int kingSquare = bitscan_forward(board.bitboards[P_KING+board.enemyColor]);//colors swapped after makeMove
 		if(!squareThreatenedBy(&board, kingSquare, board.color)){ //skip moves that put "us" in check(illegal)
 			int nodeCount = perftSearch(&board, depth-1);
 			result += nodeCount;
@@ -101,7 +101,7 @@ static int perftSearch(Board* board, int depth){
 	int nodeCount = 0;
 	for(int i = 0; i<legalMoves.length; i++){
 		Unmove unmove = makeMove(board, legalMoves.moves[i]);
-		int kingSquare = bitScanForward(board->bitboards[P_KING+board->enemyColor]);//colors swapped after makeMove
+		int kingSquare = bitscan_forward(board->bitboards[P_KING+board->enemyColor]);//colors swapped after makeMove
 		if(!squareThreatenedBy(board, kingSquare, board->color)) //skip moves that put "us" in check(illegal)
 			nodeCount += perftSearch(board, depth-1);
 		unmakeMove(board, unmove);

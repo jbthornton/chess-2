@@ -203,7 +203,7 @@ static u64 blockersFromMask(u64 mask, int x){//x should be in the range 0-2^(num
 	int i = 0;
 	while(mask){
 		if(x&(1<<i))
-			SET_BIT64(blockers, bitScanForward(mask));
+			SET_BIT64(blockers, bitscan_forward(mask));
 		mask &= mask-1;
 		i++;
 	}
@@ -216,7 +216,7 @@ static bool tryMagic(int square, u64* testTable, bool bishop){
 	u64 mask = bishop ? bishopMagics[square].mask : rookMagics[square].mask;
 	MagicData* oldMagic = (bishop)? &bishopMagics[square] : &rookMagics[square];
 	int maxIndex = 0;
-	for(int i = 0; i<(1<<countBits(mask)); i++){
+	for(int i = 0; i<(1<<count_bits(mask)); i++){
 		u64 blockers = blockersFromMask(mask, i);
 		int tableIndex = (blockers*magic)>>(64-12);
 		if(testTable[tableIndex] == magic) return false;
@@ -355,7 +355,7 @@ static void fillRookTable(){
 	printf("Rook table size %dKb\n", tableSize/1024);
 
 	for(int square = 0; square<64; square++){
-		for(int i = 0; i<(1<<countBits(rookMagics[square].mask)); i++){
+		for(int i = 0; i<(1<<count_bits(rookMagics[square].mask)); i++){
 			u64 blockers = blockersFromMask(rookMagics[square].mask, i);
 			u64 index = blockers*rookMagics[square].number;
 			index >>= 64-12;
@@ -375,7 +375,7 @@ static void fillBishopTable(){
 	printf("Bishop table size %dKb\n", tableSize/1024);
 
 	for(int square = 0; square<64; square++){
-		for(int i = 0; i<(1<<countBits(bishopMagics[square].mask)); i++){
+		for(int i = 0; i<(1<<count_bits(bishopMagics[square].mask)); i++){
 			u64 blockers = blockersFromMask(bishopMagics[square].mask, i);
 			u64 index = blockers*bishopMagics[square].number;
 			index >>= 64-12;

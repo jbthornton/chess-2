@@ -130,7 +130,7 @@ Unmove makeMove(Board* board, Move move){
 	}
 	
 	board->whitesTurn = !board->whitesTurn;
-	updatePerspectiveVariables(board);
+	update_perspective_variables(board);
 	return unmove;
 }
 
@@ -140,7 +140,7 @@ void unmakeMove(Board* board, Unmove unmove){
 	board->enPassant = unmove.enPassant;
 	board->castlingRights = unmove.castlingRights;
 	board->whitesTurn = !board->whitesTurn;
-	updatePerspectiveVariables(board);
+	update_perspective_variables(board);
 
 	//move pieces back
 	movePiece(board, unmove.to, unmove.from);
