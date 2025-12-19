@@ -23,8 +23,8 @@ typedef struct Unmove{
 	int from;
 	int captured;
 	int capturedSquare;
-	char castlingRights;
-	int enPassant;	
+	char castling_rights;
+	int ep_target;	
 	enum MOVE_TYPE type;
 }Unmove;
 

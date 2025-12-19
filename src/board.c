@@ -59,16 +59,17 @@ int count_bits(u64 x){
 }
 
 void update_perspective_variables(Board* board){
-	board->color = board->whitesTurn? 0 : 6;
-	board->enemyColor = board->whitesTurn? 6 : 0;
-	board->occupancy = 0;
+	board->color = board->whites_turn? P_WHITE : P_BLACK;
+	board->enemy_color = board->whites_turn? P_BLACK : P_WHITE;
+	board->occupied = 0;
 	for(int i = 0; i<12; i++){
-		board->occupancy |= board->bitboards[i];
+		board->occupied |= board->bitboards[i];
 	}
 
-	board->friendlyPieces = 0;
+	board->friendly_pieces = 0;
 	for(int i = board->color; i<board->color+6; i++){
-		board->friendlyPieces |= board->bitboards[i];
+		board->friendly_pieces |= board->bitboards[i];
 	}
-	board->enemyPieces = board->occupancy & (~board->friendlyPieces);
+
+	board->enemy_pieces = board->occupied & (~board->friendly_pieces);
 }

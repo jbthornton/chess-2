@@ -39,7 +39,7 @@ static void print_board(Board board, u64 h);
 static void cmd_move(TUIState *state, Move move);
 static void cmd_square(TUIState *state, int square);
 
-void run_TUI(){
+void run_tui(){
 	struct TUIState state;
 	load_fen(&state.board, STARTPOS_FEN);
 	state.running = true;
@@ -57,7 +57,7 @@ void run_TUI(){
 }
 
 static void print_board(Board board, u64 h){
-	if(board.whitesTurn) 
+	if(board.whites_turn) 
 		printf("   white's turn\n");
 	else
 		printf("   black's turn\n");

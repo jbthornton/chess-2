@@ -28,14 +28,14 @@ Unmove make_move(Board* board, Move move){
 	int piece = board->squares[move.from];
 	int captured = board->squares[move.to];
 	int pieceType = piece-(board->color);
-	int capturedType = captured-(board->enemyColor);
+	int capturedType = captured-(board->enemy_color);
 	Unmove unmove;
 	unmove.to = move.to;
 	unmove.from = move.from;
 	unmove.captured = captured;
 	unmove.capturedSquare = move.to;
-	unmove.enPassant = board->enPassant;
-	unmove.castlingRights = board->castlingRights;
+	unmove.ep_target = board->ep_target;
+	unmove.castling_rights = board->castling_rights;
 	unmove.type = move.type;
 	
 	move_piece(board, move.from, move.to);
@@ -68,7 +68,7 @@ Unmove make_move(Board* board, Move move){
 
 	//En Passant
 	//correctly handle en passant capture
-	if(pieceType == P_PAWN && move.to == board->enPassant){
+	if(pieceType == P_PAWN && move.to == board->ep_target){
 		int capturedSquare = move.to+8;
 		if(move.to>32)
 			capturedSquare = move.to-8;
@@ -80,36 +80,36 @@ Unmove make_move(Board* board, Move move){
 	}
 
 	//set en passant target square if move was a double pawn push
-	board->enPassant = -1;
+	board->ep_target = -1;
 	if(pieceType == P_PAWN){
 		//set en passant if move was a double push
 		if(move.to-move.from == 16)
-			board->enPassant = move.to-8;
+			board->ep_target = move.to-8;
 		if(move.to-move.from == -16)
-			board->enPassant = move.to+8;
+			board->ep_target = move.to+8;
 	}
 
 	//Castling Rights
 	if(pieceType == P_KING){
-		if(board->whitesTurn)
-			board->castlingRights &= ~(CR_WHITE_KINGSIDE|CR_WHITE_QUEENSIDE);
+		if(board->whites_turn)
+			board->castling_rights &= ~(CR_WHITE_KINGSIDE|CR_WHITE_QUEENSIDE);
 		else
-			board->castlingRights &= ~(CR_BLACK_KINGSIDE|CR_BLACK_QUEENSIDE);
+			board->castling_rights &= ~(CR_BLACK_KINGSIDE|CR_BLACK_QUEENSIDE);
 	}
 
 	if(pieceType == P_ROOK){
 		switch(move.from){
 			case 7: //h1
-				board->castlingRights &= ~CR_WHITE_KINGSIDE;
+				board->castling_rights &= ~CR_WHITE_KINGSIDE;
 				break;
 			case 0: //a1
-				board->castlingRights &= ~CR_WHITE_QUEENSIDE;
+				board->castling_rights &= ~CR_WHITE_QUEENSIDE;
 				break;
 			case 63: //h8
-				board->castlingRights &= ~CR_BLACK_KINGSIDE;
+				board->castling_rights &= ~CR_BLACK_KINGSIDE;
 				break;
 			case 56: //a8
-				board->castlingRights &= ~CR_BLACK_QUEENSIDE;
+				board->castling_rights &= ~CR_BLACK_QUEENSIDE;
 				break;
 		}
 	}
@@ -117,21 +117,21 @@ Unmove make_move(Board* board, Move move){
 	if(capturedType == P_ROOK){
 		switch(move.to){
 			case 7: //h1
-				board->castlingRights &= ~CR_WHITE_KINGSIDE;
+				board->castling_rights &= ~CR_WHITE_KINGSIDE;
 				break;
 			case 0: //a1
-				board->castlingRights &= ~CR_WHITE_QUEENSIDE;
+				board->castling_rights &= ~CR_WHITE_QUEENSIDE;
 				break;
 			case 63: //h8
-				board->castlingRights &= ~CR_BLACK_KINGSIDE;
+				board->castling_rights &= ~CR_BLACK_KINGSIDE;
 				break;
 			case 56: //a8
-				board->castlingRights &= ~CR_BLACK_QUEENSIDE;
+				board->castling_rights &= ~CR_BLACK_QUEENSIDE;
 				break;
 		}
 	}
 	
-	board->whitesTurn = !board->whitesTurn;
+	board->whites_turn = !board->whites_turn;
 	update_perspective_variables(board);
 	return unmove;
 }
@@ -139,9 +139,9 @@ Unmove make_move(Board* board, Move move){
 
 void unmake_move(Board* board, Unmove unmove){
 	//restore board state
-	board->enPassant = unmove.enPassant;
-	board->castlingRights = unmove.castlingRights;
-	board->whitesTurn = !board->whitesTurn;
+	board->ep_target = unmove.ep_target;
+	board->castling_rights = unmove.castling_rights;
+	board->whites_turn = !board->whites_turn;
 	update_perspective_variables(board);
 
 	//move pieces back

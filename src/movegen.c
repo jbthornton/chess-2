@@ -73,21 +73,21 @@ void ma_append(MoveArray* ma, Move move){
 	ma->moves[ma->length++] = move;
 }
 
-bool is_threatened(Board* board, int square, int enemyColor){
-	u64 pawns = board->bitboards[P_PAWN+enemyColor];
+bool is_threatened(Board* board, int square, int enemy_color){
+	u64 pawns = board->bitboards[P_PAWN+enemy_color];
 	//white pieces shift 9, 7
 	//black shift -9 -7 
 	//opposite shift because we care about the enemy
-	u64 pawnDestinations = signed_shift(pawns & ~(FILE_A), (enemyColor == 6)? -9:7);
-	pawnDestinations |= signed_shift(pawns & ~(FILE_H), (enemyColor == 6)? -7:9);
+	u64 pawnDestinations = signed_shift(pawns & ~(FILE_A), (enemy_color == 6)? -9:7);
+	pawnDestinations |= signed_shift(pawns & ~(FILE_H), (enemy_color == 6)? -7:9);
 	if(GET_BIT64(pawnDestinations, square)) return true;
 	
-	if(knightDestinations[square] & board->bitboards[P_KNIGHT+enemyColor]) return true;
-	if(magic_bishop_lookup(square, board->occupancy) & board->bitboards[P_BISHOP+enemyColor]) return true;
-	if(magic_rook_lookup(square, board->occupancy) & board->bitboards[P_ROOK+enemyColor]) return true;
-	if(magic_bishop_lookup(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
-	if(magic_rook_lookup(square, board->occupancy) & board->bitboards[P_QUEEN+enemyColor]) return true;
-	if(kingDestinations[square] & board->bitboards[P_KING+enemyColor]) return true;
+	if(knightDestinations[square] & board->bitboards[P_KNIGHT+enemy_color]) return true;
+	if(magic_bishop_lookup(square, board->occupied) & board->bitboards[P_BISHOP+enemy_color]) return true;
+	if(magic_rook_lookup(square, board->occupied) & board->bitboards[P_ROOK+enemy_color]) return true;
+	if(magic_bishop_lookup(square, board->occupied) & board->bitboards[P_QUEEN+enemy_color]) return true;
+	if(magic_rook_lookup(square, board->occupied) & board->bitboards[P_QUEEN+enemy_color]) return true;
+	if(kingDestinations[square] & board->bitboards[P_KING+enemy_color]) return true;
 	return false;
 }
 
@@ -139,28 +139,28 @@ static void add_from_shift(u64 promoRank, u64 destinations, int shift, MoveArray
 }
 
 static void add_pawn_moves(Board* board, MoveArray* ma){
-	int shift    = (board->whitesTurn)? 8 : -8;
-	u64 homeRank = (board->whitesTurn)? RANK_2 : RANK_7;
-	u64 promoRank = (board->whitesTurn)? RANK_8 : RANK_1;
+	int shift    = (board->whites_turn)? 8 : -8;
+	u64 homeRank = (board->whites_turn)? RANK_2 : RANK_7;
+	u64 promoRank = (board->whites_turn)? RANK_8 : RANK_1;
 
 	//forward
-	u64 destinations = signed_shift(board->bitboards[P_PAWN+board->color], shift)&(~board->occupancy);
+	u64 destinations = signed_shift(board->bitboards[P_PAWN+board->color], shift)&(~board->occupied);
 	add_from_shift(promoRank, destinations, shift, ma);
 	
 	//double forward
-	u64 blockers = board->occupancy;
-	if(board->whitesTurn){
-		u64 rank3 = board->occupancy&RANK_3;
+	u64 blockers = board->occupied;
+	if(board->whites_turn){
+		u64 rank3 = board->occupied&RANK_3;
 		blockers |= rank3<<8;
 	}else{
-		u64 rank6 = board->occupancy&RANK_6;
+		u64 rank6 = board->occupied&RANK_6;
 		blockers |= rank6>>8;
 	}
 	destinations = signed_shift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~blockers);
 	add_from_shift(promoRank, destinations, shift*2, ma);
 	
-	u64 targets = board->enemyPieces;
-	if(board->enPassant != -1) SET_BIT64(targets, board->enPassant);
+	u64 targets = board->enemy_pieces;
+	if(board->ep_target != -1) SET_BIT64(targets, board->ep_target);
 
 
 	//captures 
@@ -177,7 +177,7 @@ static void add_knight_moves(Board* board, MoveArray* ma){
 	while(friendlyKnights){
 		int i = bitscan_forward(friendlyKnights);
 		friendlyKnights &= friendlyKnights-1;
-		u64 destinations = knightDestinations[i] & ~board->friendlyPieces;
+		u64 destinations = knightDestinations[i] & ~board->friendly_pieces;
 		add_moves_to_dest(destinations, i, ma);
 	}
 }
@@ -187,7 +187,7 @@ static void add_king_moves(Board* board, MoveArray* ma){
 		error("NO KING AAAAH!!!\n");
 	}
 	int i = bitscan_forward(board->bitboards[P_KING+board->color]);
-	u64 destinations = kingDestinations[i] & ~board->friendlyPieces;
+	u64 destinations = kingDestinations[i] & ~board->friendly_pieces;
 	add_moves_to_dest(destinations, i, ma);
 }
 
@@ -197,8 +197,8 @@ static void add_rook_moves(Board* board, MoveArray* ma){
 	while(friendlyRooks){
 		int square = bitscan_forward(friendlyRooks);
 		friendlyRooks &= friendlyRooks-1;
-		u64 destinations = magic_rook_lookup(square, board->occupancy);
-		destinations &= ~board->friendlyPieces;
+		u64 destinations = magic_rook_lookup(square, board->occupied);
+		destinations &= ~board->friendly_pieces;
 		add_moves_to_dest(destinations, square, ma);
 	}
 }
@@ -209,8 +209,8 @@ static void add_bishop_moves(Board* board, MoveArray* ma){
 	while(friendlyBishops){
 		int square = bitscan_forward(friendlyBishops);
 		friendlyBishops &= friendlyBishops-1;
-		u64 destinations = magic_bishop_lookup(square, board->occupancy);
-		destinations &= ~board->friendlyPieces;
+		u64 destinations = magic_bishop_lookup(square, board->occupied);
+		destinations &= ~board->friendly_pieces;
 		add_moves_to_dest(destinations, square, ma);
 	}
 }
@@ -220,9 +220,9 @@ static void gen_queen_moves(Board* board, MoveArray* ma){
 	while(friendlyQueens){
 		int square = bitscan_forward(friendlyQueens);
 		friendlyQueens &= friendlyQueens-1;
-		u64 destinations = magic_rook_lookup(square, board->occupancy);
-		destinations |= magic_bishop_lookup(square, board->occupancy);
-		destinations &= ~board->friendlyPieces;
+		u64 destinations = magic_rook_lookup(square, board->occupied);
+		destinations |= magic_bishop_lookup(square, board->occupied);
+		destinations &= ~board->friendly_pieces;
 		add_moves_to_dest(destinations, square, ma);
 	}
 }
@@ -232,11 +232,11 @@ static void add_castling_moves(Board* board, MoveArray* ma){
 	//  the king or relavant rook has moved
 	//  the relevant rook has been captured
 	//the kings safety, the safety of the squares bewteen the king and the rook, and the emptyness of those squares must be checked here
-	int kingSquare = (board->whitesTurn)? 4 : 60;
-	int kingside = (board->whitesTurn)? CR_WHITE_KINGSIDE : CR_BLACK_KINGSIDE;
-	int queenside = (board->whitesTurn)? CR_WHITE_QUEENSIDE : CR_BLACK_QUEENSIDE;
-	if(board->castlingRights&queenside){
-		int rookSquare = (board->whitesTurn)? 0 : 56;
+	int kingSquare = (board->whites_turn)? 4 : 60;
+	int kingside = (board->whites_turn)? CR_WHITE_KINGSIDE : CR_BLACK_KINGSIDE;
+	int queenside = (board->whites_turn)? CR_WHITE_QUEENSIDE : CR_BLACK_QUEENSIDE;
+	if(board->castling_rights&queenside){
+		int rookSquare = (board->whites_turn)? 0 : 56;
 		bool canCastle = true;
 		for(int s = kingSquare-1; s>rookSquare; s--){
 			if(board->squares[s] != P_EMPTY){
@@ -245,7 +245,7 @@ static void add_castling_moves(Board* board, MoveArray* ma){
 			}
 		}
 		for(int s = kingSquare; s>=kingSquare-2; s--){
-			if(is_threatened(board, s, board->enemyColor)){
+			if(is_threatened(board, s, board->enemy_color)){
 				canCastle = false;
 				break;
 			}
@@ -259,8 +259,8 @@ static void add_castling_moves(Board* board, MoveArray* ma){
 		}
 	}
 
-	if(board->castlingRights&kingside){
-		int rookSquare = (board->whitesTurn)? 7 : 63;
+	if(board->castling_rights&kingside){
+		int rookSquare = (board->whites_turn)? 7 : 63;
 		bool canCastle = true;
 		for(int s = kingSquare+1; s<rookSquare; s++){
 			if(board->squares[s] != P_EMPTY){
@@ -270,7 +270,7 @@ static void add_castling_moves(Board* board, MoveArray* ma){
 
 		}
 		for(int s = kingSquare; s<=kingSquare+2; s++){
-			if(is_threatened(board, s, board->enemyColor)){
+			if(is_threatened(board, s, board->enemy_color)){
 				canCastle = false;
 				break;
 			}

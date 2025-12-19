@@ -50,7 +50,11 @@ typedef enum Piece{
 	P_KING
 }Piece;
 
-#define P_TYPE(piece) ((piece)>=6 ? (piece) - 6 : (piece)) //convert any piece to a white piece
+#define P_BLACK 6
+#define P_WHITE 0
+#define P_IS_BLACK(piece) ((piece)>=6)
+#define P_GET_COLOR(piece) (P_IS_BLACK(piece)? P_BLACK : P_WHITE)
+#define P_GET_TYPE(piece) (P_IS_BLACK(piece) ? (piece) - 6 : (piece)) //convert any piece to a white piece
 
 //Castling Rights
 #define CR_WHITE_QUEENSIDE 0b00000001
@@ -61,18 +65,18 @@ typedef enum Piece{
 typedef struct Board{
 	int squares[64];
 	u64 bitboards[12];
-	char castlingRights;
-	bool whitesTurn;
-	int enPassant; //target square for en passant, ignore if -1
-	int halfmoveClock;
-	int fullmoveClock;
-	
+	char castling_rights;
+	bool whites_turn; 
+	int ep_target; //target square for en passant, null if -1
+	int halfmove_clock;
+	int fullmoves;//fullmove counter, functions differently than the halfmove clock(doesnt reset)
+
 	//stuff for move generation
 	int color;//0 when turn = white, 6 when turn = black
-	int enemyColor;
-	u64 friendlyPieces;
-	u64 enemyPieces;
-	u64 occupancy;
+	int enemy_color;
+	u64 friendly_pieces;
+	u64 enemy_pieces;
+	u64 occupied;
 }Board;
 
 

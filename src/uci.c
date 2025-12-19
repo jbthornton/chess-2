@@ -21,7 +21,7 @@ Move str_to_move(char* str, Board board){
 	move.to = str_to_square(&str[2]);
 	move.type = M_NORMAL;
 
-	int fromp = P_TYPE(board.squares[move.from]);
+	int fromp = P_GET_TYPE(board.squares[move.from]);
 
 	if(fromp == P_PAWN){
 		if(strlen(str)>=4 && strchr("nrbq", str[4]))
@@ -85,10 +85,10 @@ void load_fen(Board *board, char* fen){
 		board->bitboards[i] = (u64)0;
 	}
 	for(int i = 0; i<64; i++) board->squares[i] = P_EMPTY;
-	board->castlingRights = 0;
-	board->halfmoveClock = 0;
-	board->fullmoveClock = 0;
-	board->enPassant = -1;
+	board->castling_rights = 0;
+	board->halfmove_clock = 0;
+	board->fullmoves = 0;
+	board->ep_target = -1;
 	
 	for(int y = 7; y>=0; y--){
 		int x = 0;
@@ -111,8 +111,8 @@ void load_fen(Board *board, char* fen){
 	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
 
 	//turn
-	if(fen[index] == 'w') board->whitesTurn = true;
-	else board->whitesTurn = false;
+	if(fen[index] == 'w') board->whites_turn = true;
+	else board->whites_turn = false;
 	index++;
 	
 	index++;//skip ' '
@@ -124,10 +124,10 @@ void load_fen(Board *board, char* fen){
 	}else{
 		for(int i = 0; i<4; i++){
 			if(fen[index] == ' ') break;
-			if(fen[index] == 'K') board->castlingRights |= CR_WHITE_KINGSIDE;
-			if(fen[index] == 'Q') board->castlingRights |= CR_WHITE_QUEENSIDE;
-			if(fen[index] == 'k') board->castlingRights |= CR_BLACK_KINGSIDE;
-			if(fen[index] == 'q') board->castlingRights |= CR_BLACK_QUEENSIDE;
+			if(fen[index] == 'K') board->castling_rights |= CR_WHITE_KINGSIDE;
+			if(fen[index] == 'Q') board->castling_rights |= CR_WHITE_QUEENSIDE;
+			if(fen[index] == 'k') board->castling_rights |= CR_BLACK_KINGSIDE;
+			if(fen[index] == 'q') board->castling_rights |= CR_BLACK_QUEENSIDE;
 			index++;
 		}
 	}
@@ -138,7 +138,7 @@ void load_fen(Board *board, char* fen){
 	if(fen[index] == '-'){
 		index++;
 	}else{
-		board->enPassant = str_to_square(&fen[index]);
+		board->ep_target = str_to_square(&fen[index]);
 		index+=2;
 	}
 	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
@@ -148,13 +148,13 @@ void load_fen(Board *board, char* fen){
 
 	//half/full move counters
 	if(index>=(len-1)) return; //accept strings that dont include half/full move counters
-	board->halfmoveClock = atoi(&fen[index]);
+	board->halfmove_clock = atoi(&fen[index]);
 	while(fen[index] != ' ') if(index++>=(len-1)) return;
 
 	index++;//skip ' '
 
 	if(index>=(len-1)) return;
-	board->fullmoveClock = atoi(&fen[index]);
+	board->fullmoves = atoi(&fen[index]);
 }
 
 void print_square(int index){
@@ -184,19 +184,19 @@ void print_fen(Board board){
 		printf("/");
 	}
 
-	printf(" %c ", (board.whitesTurn)? 'w':'b');
+	printf(" %c ", (board.whites_turn)? 'w':'b');
 
-	if(board.castlingRights&CR_WHITE_KINGSIDE) printf("K");
-	if(board.castlingRights&CR_WHITE_QUEENSIDE) printf("Q");
-	if(board.castlingRights&CR_BLACK_KINGSIDE) printf("k");
-	if(board.castlingRights&CR_BLACK_QUEENSIDE) printf("q");
-	if(board.castlingRights == 0) printf("-");
+	if(board.castling_rights&CR_WHITE_KINGSIDE) printf("K");
+	if(board.castling_rights&CR_WHITE_QUEENSIDE) printf("Q");
+	if(board.castling_rights&CR_BLACK_KINGSIDE) printf("k");
+	if(board.castling_rights&CR_BLACK_QUEENSIDE) printf("q");
+	if(board.castling_rights == 0) printf("-");
 
-	if(board.enPassant == -1){
+	if(board.ep_target == -1){
 		printf(" - ");
 	}else{
-		print_square(board.enPassant);
+		print_square(board.ep_target);
 	}
 
-	printf(" %d %d", board.halfmoveClock, board.fullmoveClock);
+	printf(" %d %d", board.halfmove_clock, board.fullmoves);
 }

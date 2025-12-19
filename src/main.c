@@ -13,6 +13,6 @@
 
 int main(int argc, char* argv[]){
 	fill_move_tables();
-	run_TUI();
+	run_tui();
 	return 0;
 }

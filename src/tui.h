@@ -1,3 +1,3 @@
 #pragma once
 
-void run_TUI();
+void run_tui();
