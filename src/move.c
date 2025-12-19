@@ -4,7 +4,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static void movePiece(Board* board, int from, int to){
+bool ispromotion(Move move){
+	return (move.type != M_NORMAL && move.type != M_CASTLE);
+}
+
+//helper function for make/unmake move
+static void move_piece(Board* board, int from, int to){
 	int piece = board->squares[from];
 	int captured = board->squares[to];
 	//update square-centric board
@@ -18,11 +23,8 @@ static void movePiece(Board* board, int from, int to){
 		RESET_BIT64(board->bitboards[captured], to);
 }
 
-bool moveIsPromo(Move move){
-	return (move.type != M_NORMAL && move.type != M_CASTLE);
-}
 
-Unmove makeMove(Board* board, Move move){
+Unmove make_move(Board* board, Move move){
 	int piece = board->squares[move.from];
 	int captured = board->squares[move.to];
 	int pieceType = piece-(board->color);
@@ -36,10 +38,10 @@ Unmove makeMove(Board* board, Move move){
 	unmove.castlingRights = board->castlingRights;
 	unmove.type = move.type;
 	
-	movePiece(board, move.from, move.to);
+	move_piece(board, move.from, move.to);
 	
 	//Promotion
-	if(moveIsPromo(move)){
+	if(ispromotion(move)){
 		int promotion = move.type+board->color;//M_PROMO_QUEEN == P_QUEEN ect
 		board->squares[move.to] = promotion;
 		RESET_BIT64(board->bitboards[piece], move.to);
@@ -50,16 +52,16 @@ Unmove makeMove(Board* board, Move move){
 	if(move.type == M_CASTLE){
 		//move the rook
 		if(move.to == 62)//g8
-			movePiece(board, 63, 61);//h8->f8
+			move_piece(board, 63, 61);//h8->f8
 
 		if(move.to == 58)//c8
-			movePiece(board, 56, 59);//a8->d8
+			move_piece(board, 56, 59);//a8->d8
 
 		if(move.to == 6)//g1
-			movePiece(board, 7, 5);//h1->f1
+			move_piece(board, 7, 5);//h1->f1
 
 		if(move.to == 2)//c1
-			movePiece(board, 0, 3);//a1->d1
+			move_piece(board, 0, 3);//a1->d1
 
 		//because any castling move is a king move, castling rights will be correctly updated later 
 	}
@@ -135,7 +137,7 @@ Unmove makeMove(Board* board, Move move){
 }
 
 
-void unmakeMove(Board* board, Unmove unmove){
+void unmake_move(Board* board, Unmove unmove){
 	//restore board state
 	board->enPassant = unmove.enPassant;
 	board->castlingRights = unmove.castlingRights;
@@ -143,7 +145,7 @@ void unmakeMove(Board* board, Unmove unmove){
 	update_perspective_variables(board);
 
 	//move pieces back
-	movePiece(board, unmove.to, unmove.from);
+	move_piece(board, unmove.to, unmove.from);
 
 	//undo capture/en passant
 	if(unmove.captured != P_EMPTY){
@@ -154,16 +156,16 @@ void unmakeMove(Board* board, Unmove unmove){
 	if(unmove.type == M_CASTLE){
 		//move rook back
 		if(unmove.to == 62)//g8
-			movePiece(board, 61, 63);//f8->h8
+			move_piece(board, 61, 63);//f8->h8
 
 		if(unmove.to == 58)//c8
-			movePiece(board, 59, 56);//d8->a8
+			move_piece(board, 59, 56);//d8->a8
 
 		if(unmove.to == 6)//g1
-			movePiece(board, 5, 7);//f1->h1
+			move_piece(board, 5, 7);//f1->h1
 
 		if(unmove.to == 2)//c1
-			movePiece(board, 3, 0);//d1->a1	
+			move_piece(board, 3, 0);//d1->a1	
 	}
 
 	//promotion

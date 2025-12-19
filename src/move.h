@@ -28,7 +28,6 @@ typedef struct Unmove{
 	enum MOVE_TYPE type;
 }Unmove;
 
-bool moveIsPromo(Move move);
-Unmove makeMove(Board* board, Move move);
-void unmakeMove(Board* board, Unmove unmove);
-void printMove(Move move);
+bool ispromotion(Move move);
+Unmove make_move(Board* board, Move move);
+void unmake_move(Board* board, Unmove unmove);

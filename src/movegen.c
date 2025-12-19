@@ -5,8 +5,7 @@
 
 static u64 knightDestinations[64];
 static u64 kingDestinations[64];
-static u64* rookDestinations[64];
-static u64* bishopDestinations[64];
+
 
 void fillMoveTables(){
 	const int knightOffsets[16] = {

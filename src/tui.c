@@ -123,13 +123,13 @@ static void run_command(char* cmd, TUIState *state){
 }
 
 static void cmd_move(TUIState *state, Move move){
-	makeMove(&state->board, move);
+	make_move(&state->board, move);
 	printf("\n");
 	print_board(state->board, ((u64)1 << move.from) | ((u64)1 << move.to));
 
 	printf("thinking...\n");
 	move = search(state->board, 4);
-	makeMove(&state->board, move);
+	make_move(&state->board, move);
 	state->highlighted = ((u64)1 << move.from) | ((u64)1 << move.to);
 }
 

@@ -164,7 +164,7 @@ void print_square(int index){
 void print_move(Move m){
 	print_square(m.from);
 	print_square(m.to);
-	if(moveIsPromo(m))
+	if(ispromotion(m))
 		printf("%c", piece_to_char(m.type));
 }
 
