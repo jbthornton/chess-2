@@ -50,6 +50,8 @@ typedef enum Piece{
 	P_KING
 }Piece;
 
+#define P_TYPE(piece) ((piece)>=6 ? (piece) - 6 : (piece)) //convert any piece to a white piece
+
 //Castling Rights
 #define CR_WHITE_QUEENSIDE 0b00000001
 #define CR_WHITE_KINGSIDE  0b00000010
@@ -73,15 +75,10 @@ typedef struct Board{
 	u64 occupancy;
 }Board;
 
-void loadFEN(Board *board, char* fen);
-void makeFen(Board *board, char* fen);
 
 int bitScanForward(u64 x);
 u64 BBSignedShift(u64 x, int s);
 int countBits(u64 x);
 void updatePerspectiveVariables(Board *board);
 
-int charToPiece(char c);
-bool isSquare(char* str);
 int squareToIndex(char* str);
-bool isMove(char* str);

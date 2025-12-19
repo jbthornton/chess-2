@@ -174,3 +174,4 @@ void unmakeMove(Board* board, Unmove unmove){
 		SET_BIT64(board->bitboards[P_PAWN+board->color], unmove.from);
 	}
 }
+

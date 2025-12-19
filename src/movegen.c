@@ -1,5 +1,4 @@
 #include "movegen.h"
-#include "print.h"
 #include "magic.h"
 #include "error.h"
 #include <stdio.h>
@@ -181,7 +180,6 @@ static void genKnightMoves(Board* board, MoveArray* ma){
 
 static void genKingMoves(Board* board, MoveArray* ma){
 	if(board->bitboards[P_KING+board->color] == 0) {
-		printBoard(board, 0);
 		error("NO KING AAAAH!!!\n");
 	}
 	int i = bitScanForward(board->bitboards[P_KING+board->color]);
