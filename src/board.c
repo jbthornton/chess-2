@@ -73,3 +73,12 @@ void update_perspective_variables(Board* board){
 
 	board->enemy_pieces = board->occupied & (~board->friendly_pieces);
 }
+
+
+void set_piece(Board* board, int square, int piece){
+	int old = board->squares[square];
+	if(old != P_EMPTY)
+		RESET_BIT64(board->bitboards[old], square);
+	SET_BIT64(board->bitboards[piece], square);
+	board->squares[square] = piece;
+}

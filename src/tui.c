@@ -8,6 +8,7 @@
 #include "move.h"
 #include "search.h"
 #include "uci.h"
+#include "test.h"
 
 #define C_DARK "\x1b[42m"
 #define C_LIGHT "\x1b[47m"
@@ -15,6 +16,7 @@
 #define C_TEXT "\x1b[30m"
 #define C_CLEAR "\x1b[0m"
 
+//debug commands like "test" are not included in the help menu
 #define HELP\
 	"valid commands:\n"\
 	"    exit - exit the program\n"\
@@ -106,6 +108,11 @@ static void run_command(char* cmd, TUIState *state){
 
 	if(strncmp(cmd, "load ", 5) == 0 && strlen(cmd)>6){
 		load_fen(&state->board, &cmd[5]);
+		return;
+	}
+
+	if(strcmp(cmd, "test") == 0){
+		tst_movegen();
 		return;
 	}
 

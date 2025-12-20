@@ -78,6 +78,8 @@ bool is_move(char* str){
 	return false;
 }
 
+static void load_fen_position(Board* board, char* fen, int* i);
+
 void load_fen(Board *board, char* fen){
 	int len = strlen(fen);
 	int index = 0;
@@ -90,25 +92,9 @@ void load_fen(Board *board, char* fen){
 	board->fullmoves = 0;
 	board->ep_target = -1;
 	
-	for(int y = 7; y>=0; y--){
-		int x = 0;
-		while(x<8){
-			if(isalpha(fen[index])){
-				int piece = char_to_piece(fen[index]);
-				board->squares[BOARD_INDEX(x,y)] = piece;
-				SET_BIT64(board->bitboards[piece], BOARD_INDEX(x,y));
-				x++;
-				index++;
-			}
-			if(isdigit(fen[index])){
-				x += fen[index] - '0';
-				index++;
-			}
-		}
-		if(fen[index] != '/' && y!=0) error("load_fen() missing '/'");
-		index++;
-	}
-	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
+	load_fen_position(board, fen, &index);
+	printf("loaded position, remaining: %s\n", &fen[index]);
+	index++;//skip ' '
 
 	//turn
 	if(fen[index] == 'w') board->whites_turn = true;
@@ -155,6 +141,42 @@ void load_fen(Board *board, char* fen){
 
 	if(index>=(len-1)) return;
 	board->fullmoves = atoi(&fen[index]);
+}
+
+static void load_fen_position(Board* board, char* fen, int* i){
+	int len = strlen(fen);
+	int x = 0;
+	int y = 7;
+	while(!(y == 0 && x >= 7)){
+		if(*i>=len){
+			printf("%d>=%d\n",*i, len);
+			error("load_fen_position(): fen cut short :(");
+		}
+		char c = fen[(*i)++];
+
+		if(c == '/'){
+			if(x!=8) error("load_fen_position(): missing squares");
+			y--;
+			x = 0;
+			continue;
+		}
+
+		if(x>=8) error("load_fen_position(): missing '/' character");
+
+		if(isalpha(c)){
+			int piece = char_to_piece(c);
+			set_piece(board, BOARD_INDEX(x, y), piece);
+			x++;
+			continue;
+		}
+
+		if(isdigit(c)){
+			x += c - '0';
+			continue;
+		}
+
+		error("load_fen_position(): unexpected character");
+	}
 }
 
 void print_square(int index){
