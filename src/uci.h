@@ -8,8 +8,9 @@ int char_to_piece(char p);
 int str_to_square(const char* str);
 Move str_to_move(const char* str, Board board);//board needed to infer move type
 
-bool is_square(const char* str);
-bool is_move(const char* str);
+bool ispiece(char c);
+bool issquare(const char* str);
+bool ismove(const char* str);
 
 
 void load_fen(Board *board, const char* fen);

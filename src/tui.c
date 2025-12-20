@@ -112,12 +112,12 @@ static void run_command(char* cmd, TUIState *state){
 		return;
 	}
 
-	if(is_move(cmd)){
+	if(ismove(cmd)){
 		cmd_move(state, str_to_move(cmd, state->board));
 		return;
 	}
 
-	if(is_square(cmd)){
+	if(issquare(cmd)){
 		cmd_square(state, str_to_square(cmd));
 		return;
 	}

@@ -48,6 +48,7 @@ Move str_to_move(const char* str, Board board){
 	return move;
 }
 
+
 int char_to_piece(char c){
 	int piece = 0;
 	switch(tolower(c)){
@@ -70,23 +71,27 @@ int char_to_piece(char c){
 			piece = P_QUEEN;
 			break;
 		default:
-			error("char_to_piece(), received invalid char");
+			error("char_to_piece(): received invalid char: '%c'\n", c);
 	}
 	if(islower(c))
 		piece += 6;
 	return piece;
 }
 
-bool is_square(const char* str){
+bool ispiece(char c){
+	return strchr("pnbrqkPNBRQK", c) != NULL;
+}
+
+bool issquare(const char* str){
 	if(strlen(str)<2) return false;
 	if(str[0]<'a' || str[0]>'h') return false;
 	if(str[1]<'1' || str[1]>'8') return false;
 	return true;
 }
 
-bool is_move(const char* str){
+bool ismove(const char* str){
 	if(strlen(str)<4) return false;
-	if(is_square(str) && is_square(&str[2])) return true;
+	if(issquare(str) && issquare(&str[2])) return true;
 	return false;
 }
 
@@ -101,27 +106,27 @@ static const char* load_fen_fmc(Board* board, const char* fen);
 void load_fen(Board *board, const char* fen){
 	board->halfmove_clock = 0;
 	board->fullmoves = 0;
-	
+
 	fen = load_fen_position(board, fen);
-	if(fen[0] != ' ') error("load_fen(): expected ' ' after piece placement");
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after piece placement, got '%c'\n", fen[0]);
 
 	fen = load_fen_turn(board, &fen[1]);
-	if(fen[0] != ' ') error("load_fen(): expected ' ' after side to move");
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after side to move, got '%c'\n", fen[0]);
 
 	fen = load_fen_castling(board, &fen[1]);
-	if(fen[0] != ' ') error("load_fen(): expected ' ' after castling rights");
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after castling rights, got '%c'\n", fen[0]);
 
 	fen = load_fen_ep(board, &fen[1]);
 	if(fen[0] != ' ' && fen[0] != 0) //strings dont have to include hmc/fmc
-		error("load_fen(): expected ' ' or string termination after en passant square");
+		error("load_fen(): expected ' ' or string termination after en passant square, got '%c'\n", fen[0]);
 
 
 	update_perspective_variables(board);
 
 	if(fen[0] == 0) return; //accept strings that dont include half/full move counters
 	fen = load_fen_hmc(board, &fen[1]);
-	if(fen[0] == 0) error("load_fen(): must include both the halfmove clock and the fullmove counter, or exclude both");
-	if(fen[0] != ' ') error("load_fen(): expected ' ' after halfmove clock");
+	if(fen[0] == 0) error("load_fen(): must include both the halfmove clock and the fullmove counter, or exclude both\n");
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after halfmove clock, got %c\n", fen[0]);
 
 	fen = load_fen_fmc(board, &fen[1]);
 }
@@ -138,22 +143,22 @@ static const char* load_fen_position(Board* board, const char* fen){
 	int len = strlen(fen);
 	int x = 0;
 	int y = 7;
-	while(!(y == 0 && x > 7)){
+	while(!(y == 0 && x == 8)){
 		if(i>=len)
-			error("load_fen_position(): fen cut short :(");
+			error("load_fen_position(): fen cut short :(\n");
 
 		char c = fen[i++];
 
 		if(c == '/'){
-			if(x!=8) error("load_fen_position(): missing squares");
+			if(x!=8) error("load_fen_position(): rank %d does not have 8 squares\n", y+1);
 			y--;
 			x = 0;
 			continue;
 		}
 
-		if(x>=8) error("load_fen_position(): missing '/' character");
+		if(x>=8) error("load_fen_position(): rank %d is too long\n", y+1);
 
-		if(isalpha(c)){
+		if(ispiece(c)){
 			int piece = char_to_piece(c);
 			set_piece(board, BOARD_INDEX(x, y), piece);
 			x++;
@@ -165,7 +170,7 @@ static const char* load_fen_position(Board* board, const char* fen){
 			continue;
 		}
 
-		error("load_fen_position(): unexpected character");
+		error("load_fen_position(): unexpected character '%c'\n", c);
 	}
 	return &fen[i];
 }
@@ -181,7 +186,7 @@ static const char* load_fen_turn(Board* board, const char* fen){
 			break;
 
 		default:
-			error("load_fen(): expected 'w' | 'b' after peice placement");
+			error("load_fen(): expected 'w' | 'b' after peice placement, got '%c'\n", fen[0]);
 	}
 	return &fen[1];
 }
@@ -193,7 +198,7 @@ static const char* load_fen_castling(Board* board, const char* fen){
 
 	for(int i = 0; i<4; i++){
 		if(fen[0] == ' '){
-			if(i == 0) error("load_fen_castling(): no castling section");
+			if(i == 0) error("load_fen_castling(): no castling section\n");
 			break;
 		}
 
@@ -211,7 +216,7 @@ static const char* load_fen_castling(Board* board, const char* fen){
 				board->castling_rights |= CR_BLACK_QUEENSIDE;
 				break;
 			default:
-				error("load_fen_castling(): unexpected character");
+				error("load_fen_castling(): unexpected character '%c'\n", fen[0]);
 		}
 
 		fen = &fen[1];
@@ -225,8 +230,8 @@ static const char* load_fen_ep(Board* board, const char* fen){
 		return &fen[1];
 	}
 
-	if(!is_square(fen))//is_square only looks at the 1st 2 characters in the str argument
-		error("load_fen_ep(): expected square or '-'");
+	if(!issquare(fen))//issquare only looks at the 1st 2 characters in the str argument
+		error("load_fen_ep(): expected square or '-', got '%c'\n", fen[0]);
 
 	board->ep_target = str_to_square(fen);
 	return &fen[2];
@@ -234,7 +239,7 @@ static const char* load_fen_ep(Board* board, const char* fen){
 
 static const char* load_fen_hmc(Board* board, const char* fen){
 	if(!isdigit(fen[0]))
-		error("load_fen_hmc(): expected digit");
+		error("load_fen_hmc(): expected digit, got '%c'\n", fen[0]);
 	char* end;
 	board->halfmove_clock = strtol(fen, &end, 10);
 	return end;
@@ -242,7 +247,7 @@ static const char* load_fen_hmc(Board* board, const char* fen){
 
 static const char* load_fen_fmc(Board* board, const char* fen){
 	if(!isdigit(fen[0]))
-		error("load_fen_fmc(): expected digit");
+		error("load_fen_fmc(): expected digit, got '%c'\n", fen[0]);
 	char* end;
 	board->fullmoves = strtol(fen, &end, 10);
 	return end;
