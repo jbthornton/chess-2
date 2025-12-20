@@ -23,11 +23,11 @@ char piece_to_char(int piece){
 	return pieceChars[piece+1];
 }
 
-int str_to_square(char* str){
+int str_to_square(const char* str){
 	return BOARD_INDEX(str[0]-'a',str[1]-'1');
 }
 
-Move str_to_move(char* str, Board board){
+Move str_to_move(const char* str, Board board){
 	Move move;
 	move.from = str_to_square(str);
 	move.to = str_to_square(&str[2]);
@@ -77,30 +77,28 @@ int char_to_piece(char c){
 	return piece;
 }
 
-bool is_square(char* str){
+bool is_square(const char* str){
 	if(strlen(str)<2) return false;
 	if(str[0]<'a' || str[0]>'h') return false;
 	if(str[1]<'1' || str[1]>'8') return false;
 	return true;
 }
 
-bool is_move(char* str){
+bool is_move(const char* str){
 	if(strlen(str)<4) return false;
 	if(is_square(str) && is_square(&str[2])) return true;
 	return false;
 }
 
 //all return a pointer to the first character after their part of the fen string(should be ' ' or 0)
-static char* load_fen_position(Board* board, char* fen);
-static char* load_fen_turn(Board* board, char* fen);
-static char* load_fen_castling(Board* board, char* fen);
-static char* load_fen_ep(Board* board, char* fen);
-static char* load_fen_hmc(Board* board, char* fen);
-static char* load_fen_fmc(Board* board, char* fen);
+static const char* load_fen_position(Board* board, const char* fen);
+static const char* load_fen_turn(Board* board, const char* fen);
+static const char* load_fen_castling(Board* board, const char* fen);
+static const char* load_fen_ep(Board* board, const char* fen);
+static const char* load_fen_hmc(Board* board, const char* fen);
+static const char* load_fen_fmc(Board* board, const char* fen);
 
-void load_fen(Board *board, char* fen){
-	fen = trim_whitespace(fen);
-
+void load_fen(Board *board, const char* fen){
 	board->halfmove_clock = 0;
 	board->fullmoves = 0;
 	
@@ -130,7 +128,7 @@ void load_fen(Board *board, char* fen){
 
 //in load_fen_* functions unexpected character also catches the string being too short
 
-static char* load_fen_position(Board* board, char* fen){
+static const char* load_fen_position(Board* board, const char* fen){
 	for(int i = 0; i<12; i++){
 		board->bitboards[i] = (u64)0;
 	}
@@ -172,7 +170,7 @@ static char* load_fen_position(Board* board, char* fen){
 	return &fen[i];
 }
 
-static char* load_fen_turn(Board* board, char* fen){
+static const char* load_fen_turn(Board* board, const char* fen){
 	switch(fen[0]){
 		case 'w':
 			board->whites_turn = true;
@@ -188,7 +186,7 @@ static char* load_fen_turn(Board* board, char* fen){
 	return &fen[1];
 }
 
-static char* load_fen_castling(Board* board, char* fen){
+static const char* load_fen_castling(Board* board, const char* fen){
 	board->castling_rights = 0;
 	if(fen[0] == '-')
 		return &fen[1];
@@ -221,7 +219,7 @@ static char* load_fen_castling(Board* board, char* fen){
 	return fen;
 }
 
-static char* load_fen_ep(Board* board, char* fen){
+static const char* load_fen_ep(Board* board, const char* fen){
 	if(fen[0] == '-'){
 		board->ep_target = -1;
 		return &fen[1];
@@ -234,7 +232,7 @@ static char* load_fen_ep(Board* board, char* fen){
 	return &fen[2];
 }
 
-static char* load_fen_hmc(Board* board, char* fen){
+static const char* load_fen_hmc(Board* board, const char* fen){
 	if(!isdigit(fen[0]))
 		error("load_fen_hmc(): expected digit");
 	char* end;
@@ -242,7 +240,7 @@ static char* load_fen_hmc(Board* board, char* fen){
 	return end;
 }
 
-static char* load_fen_fmc(Board* board, char* fen){
+static const char* load_fen_fmc(Board* board, const char* fen){
 	if(!isdigit(fen[0]))
 		error("load_fen_fmc(): expected digit");
 	char* end;

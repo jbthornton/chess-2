@@ -5,4 +5,4 @@
 
 Move search(Board board, int depth);
 
-float perft(char* fen, int depth, int expected, bool divided);//returns time of search in seconds
+float perft(const char* fen, int depth, int expected, bool divided);//returns time of search in seconds

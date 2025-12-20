@@ -59,7 +59,7 @@ static int nmax(Board *board, int depth){
 }
 
 static int perftSearch(Board* board, int depth);
-float perft(char* fen, int depth, int expected, bool divided){
+float perft(const char* fen, int depth, int expected, bool divided){
 	Board board;
 	load_fen(&board, fen);
 	int result = 0;
@@ -86,8 +86,8 @@ float perft(char* fen, int depth, int expected, bool divided){
 	clock_t end = clock();
 	clock_t elapsed = end-beginning;
 	float elapsedSeconds = (float)elapsed/CLOCKS_PER_SEC;
-	if(expected != 0) printf("Depth: %d, %d/%d, Error: %d, Time: %fs\n", depth, result, expected, result-expected, elapsedSeconds);
-	if(expected == 0) printf("Depth: %d, %d, Time: %fs\n", depth, result, elapsedSeconds);
+	if(expected != 0) printf("depth: %d, nodes: %d/%d, err: %d, took %f sec\n", depth, result, expected, result-expected, elapsedSeconds);
+	if(expected == 0) printf("depth: %d, nodes: %d, took %f sec\n", depth, result, elapsedSeconds);
 	return elapsedSeconds;
 }
 

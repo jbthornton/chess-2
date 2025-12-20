@@ -4,7 +4,7 @@
 
 void tst_movegen(){
 	//perft results from https://www.chessprogramming.org/Perft_Results
-	char positions[6][MAX_FEN_SIZE] = {
+	const char positions[6][MAX_FEN_SIZE] = {
 		STARTPOS_FEN,//startpos
 		"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",//p2
 		"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",//p3
@@ -13,7 +13,7 @@ void tst_movegen(){
 		"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"//p6
 	};
 
-	int results[18] = {
+	const int results[18] = {
 		197281, 4865609, 119060324,//startpos
 		97862,  4085603, 193690690,//p2
 		674624, 11030083,178633661,//p3
@@ -22,7 +22,7 @@ void tst_movegen(){
 		89890,  3894594, 164075551//p6
 	};
 
-	int depths[18] = {
+	const int depths[18] = {
 		4,5,6,//startpos
 		3,4,5,//p2
 		5,6,7,//p3
