@@ -5,6 +5,18 @@
 #include <stdlib.h>
 #include "error.h"
 
+char* trim_whitespace(char* str){
+	//chop whitespace from beginning
+	while(isspace(str[0]))
+		str = &str[1];
+
+	//chop whitespace from end
+	while(isspace(str[strlen(str)-1]))
+		str[strlen(str)-1] = 0;
+
+	return str;
+}
+
 char piece_to_char(int piece){
 	if(piece<-1 || piece>P_KING+6) return '?';
 	const char* pieceChars = " PNBRQKpnbrqk";
@@ -78,81 +90,61 @@ bool is_move(char* str){
 	return false;
 }
 
-static void load_fen_position(Board* board, char* fen, int* i);
+//all return a pointer to the first character after their part of the fen string(should be ' ' or 0)
+static char* load_fen_position(Board* board, char* fen);
+static char* load_fen_turn(Board* board, char* fen);
+static char* load_fen_castling(Board* board, char* fen);
+static char* load_fen_ep(Board* board, char* fen);
+static char* load_fen_hmc(Board* board, char* fen);
+static char* load_fen_fmc(Board* board, char* fen);
 
 void load_fen(Board *board, char* fen){
-	int len = strlen(fen);
-	int index = 0;
+	fen = trim_whitespace(fen);
+
+	board->halfmove_clock = 0;
+	board->fullmoves = 0;
+	
+	fen = load_fen_position(board, fen);
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after piece placement");
+
+	fen = load_fen_turn(board, &fen[1]);
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after side to move");
+
+	fen = load_fen_castling(board, &fen[1]);
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after castling rights");
+
+	fen = load_fen_ep(board, &fen[1]);
+	if(fen[0] != ' ' && fen[0] != 0) //strings dont have to include hmc/fmc
+		error("load_fen(): expected ' ' or string termination after en passant square");
+
+
+	update_perspective_variables(board);
+
+	if(fen[0] == 0) return; //accept strings that dont include half/full move counters
+	fen = load_fen_hmc(board, &fen[1]);
+	if(fen[0] == 0) error("load_fen(): must include both the halfmove clock and the fullmove counter, or exclude both");
+	if(fen[0] != ' ') error("load_fen(): expected ' ' after halfmove clock");
+
+	fen = load_fen_fmc(board, &fen[1]);
+}
+
+//in load_fen_* functions unexpected character also catches the string being too short
+
+static char* load_fen_position(Board* board, char* fen){
 	for(int i = 0; i<12; i++){
 		board->bitboards[i] = (u64)0;
 	}
 	for(int i = 0; i<64; i++) board->squares[i] = P_EMPTY;
-	board->castling_rights = 0;
-	board->halfmove_clock = 0;
-	board->fullmoves = 0;
-	board->ep_target = -1;
-	
-	load_fen_position(board, fen, &index);
-	printf("loaded position, remaining: %s\n", &fen[index]);
-	index++;//skip ' '
 
-	//turn
-	if(fen[index] == 'w') board->whites_turn = true;
-	else board->whites_turn = false;
-	index++;
-	
-	index++;//skip ' '
-	
-	//castling rights	
-	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
-	if(fen[index] == '-'){
-		index++;
-	}else{
-		for(int i = 0; i<4; i++){
-			if(fen[index] == ' ') break;
-			if(fen[index] == 'K') board->castling_rights |= CR_WHITE_KINGSIDE;
-			if(fen[index] == 'Q') board->castling_rights |= CR_WHITE_QUEENSIDE;
-			if(fen[index] == 'k') board->castling_rights |= CR_BLACK_KINGSIDE;
-			if(fen[index] == 'q') board->castling_rights |= CR_BLACK_QUEENSIDE;
-			index++;
-		}
-	}
-	index++;//skip ' '
-	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
-
-	//en passan square
-	if(fen[index] == '-'){
-		index++;
-	}else{
-		board->ep_target = str_to_square(&fen[index]);
-		index+=2;
-	}
-	if(index>=(len-1)) error("load_fen() fen is cut short or invalid");
-	index++;//skip ' '
-
-	update_perspective_variables(board);
-
-	//half/full move counters
-	if(index>=(len-1)) return; //accept strings that dont include half/full move counters
-	board->halfmove_clock = atoi(&fen[index]);
-	while(fen[index] != ' ') if(index++>=(len-1)) return;
-
-	index++;//skip ' '
-
-	if(index>=(len-1)) return;
-	board->fullmoves = atoi(&fen[index]);
-}
-
-static void load_fen_position(Board* board, char* fen, int* i){
+	int i = 0;
 	int len = strlen(fen);
 	int x = 0;
 	int y = 7;
-	while(!(y == 0 && x >= 7)){
-		if(*i>=len){
-			printf("%d>=%d\n",*i, len);
+	while(!(y == 0 && x > 7)){
+		if(i>=len)
 			error("load_fen_position(): fen cut short :(");
-		}
-		char c = fen[(*i)++];
+
+		char c = fen[i++];
 
 		if(c == '/'){
 			if(x!=8) error("load_fen_position(): missing squares");
@@ -177,6 +169,85 @@ static void load_fen_position(Board* board, char* fen, int* i){
 
 		error("load_fen_position(): unexpected character");
 	}
+	return &fen[i];
+}
+
+static char* load_fen_turn(Board* board, char* fen){
+	switch(fen[0]){
+		case 'w':
+			board->whites_turn = true;
+			break;
+
+		case 'b':
+			board->whites_turn = false;
+			break;
+
+		default:
+			error("load_fen(): expected 'w' | 'b' after peice placement");
+	}
+	return &fen[1];
+}
+
+static char* load_fen_castling(Board* board, char* fen){
+	board->castling_rights = 0;
+	if(fen[0] == '-')
+		return &fen[1];
+
+	for(int i = 0; i<4; i++){
+		if(fen[0] == ' '){
+			if(i == 0) error("load_fen_castling(): no castling section");
+			break;
+		}
+
+		switch(fen[0]){
+			case 'K':
+				board->castling_rights |= CR_WHITE_KINGSIDE;
+				break;
+			case 'k':
+				board->castling_rights |= CR_BLACK_KINGSIDE;
+				break;
+			case 'Q':
+				board->castling_rights |= CR_WHITE_QUEENSIDE;
+				break;
+			case 'q':
+				board->castling_rights |= CR_BLACK_QUEENSIDE;
+				break;
+			default:
+				error("load_fen_castling(): unexpected character");
+		}
+
+		fen = &fen[1];
+	}
+	return fen;
+}
+
+static char* load_fen_ep(Board* board, char* fen){
+	if(fen[0] == '-'){
+		board->ep_target = -1;
+		return &fen[1];
+	}
+
+	if(!is_square(fen))//is_square only looks at the 1st 2 characters in the str argument
+		error("load_fen_ep(): expected square or '-'");
+
+	board->ep_target = str_to_square(fen);
+	return &fen[2];
+}
+
+static char* load_fen_hmc(Board* board, char* fen){
+	if(!isdigit(fen[0]))
+		error("load_fen_hmc(): expected digit");
+	char* end;
+	board->halfmove_clock = strtol(fen, &end, 10);
+	return end;
+}
+
+static char* load_fen_fmc(Board* board, char* fen){
+	if(!isdigit(fen[0]))
+		error("load_fen_fmc(): expected digit");
+	char* end;
+	board->fullmoves = strtol(fen, &end, 10);
+	return end;
 }
 
 void print_square(int index){

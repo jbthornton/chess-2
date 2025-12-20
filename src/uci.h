@@ -1,6 +1,7 @@
 #include "board.h"
 #include "move.h"
 
+char* trim_whitespace(char* str);//removes whitespace at the end of the string and returns 1st solid character
 char piece_to_char(int p);
 int char_to_piece(char p);
 

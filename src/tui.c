@@ -84,11 +84,7 @@ static void print_board(Board board, u64 h){
 }
 
 static void run_command(char* cmd, TUIState *state){
-	while(isspace(cmd[0]))//ignore whitespace in beginning
-		cmd = &cmd[1];
-
-	while(isspace(cmd[strlen(cmd)-1]))//ignore whitespace at end
-		cmd[strlen(cmd)-1] = 0;
+	cmd = trim_whitespace(cmd);
 
 	if(strcmp(cmd, "exit") == 0){
 		printf("bye\n");

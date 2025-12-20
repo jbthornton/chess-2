@@ -12,6 +12,7 @@ void tst_movegen(){
 		"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",//p5
 		"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"//p6
 	};
+
 	int results[18] = {
 		197281, 4865609, 119060324,//startpos
 		97862,  4085603, 193690690,//p2
@@ -20,6 +21,7 @@ void tst_movegen(){
 		62379,  2103487, 89941194,//p5
 		89890,  3894594, 164075551//p6
 	};
+
 	int depths[18] = {
 		4,5,6,//startpos
 		3,4,5,//p2
@@ -28,9 +30,11 @@ void tst_movegen(){
 		3,4,5,//p5
 		3,4,5,//p6
 	};
+
 	float time = 0;
 	for(int i = 0; i<18; i++){
-		printf("%d) ", i);
+		printf("position %d \"%s\":\n", i, positions[i]);
+		printf("  ");
 		time += perft(positions[i/3], depths[i], results[i], false);
 	}
 	printf("Total time: %fs", time);
