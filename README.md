@@ -8,5 +8,5 @@ make
 
 run:
 ```
-./main
+./chess
 ```
