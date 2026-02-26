@@ -1,6 +1,6 @@
 CC:=clang
 CARGS:=-O3
-BINNAME=main
+BINNAME=chess
 SRC:= $(wildcard src/*.c)
 
 OBJ:=$(SRC:.c=.o)
